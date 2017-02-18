@@ -34,31 +34,28 @@ function love.load(arg)
     table.insert(entities.players, Character:newPlayerChar(screen_values.width / 2, screen_values.height * 0.8, 1500, 10))
     table.insert(entities.enemies, new_grunt(500, 300))
 
-
-
-    --coin_image = love.graphics.newImage("Assets/coin.png")
-    --local h = anim8.newGrid(64, 64, coin_image:getWidth(), coin_image:getHeight())
-    --table.insert(entities.animations, anim8.newAnimation(h('1-64', 1), 0.02))
-
-
     p1_idle = love.graphics.newImage("Assets/miniplayer_idle.png")
     local h = anim8.newGrid(64, 104, p1_idle:getWidth(), p1_idle:getHeight())
     p1_punch = love.graphics.newImage("Assets/miniplayer_punch.png")
     local j = anim8.newGrid(64, 104, p1_punch:getWidth(), p1_punch:getHeight())
     p1_walk = love.graphics.newImage("Assets/miniplayer_walk.png")
     local k = anim8.newGrid(64, 104, p1_punch:getWidth(), p1_punch:getHeight())
+    p1_kick = love.graphics.newImage("Assets/miniplayer_kick.png")
+    local l = anim8.newGrid(64, 104, p1_kick:getWidth(), p1_kick:getHeight())
 
     player1_animations = {
         idle = anim8.newAnimation(h('1-4', 1), 0.25),
         punch = anim8.newAnimation(j('1-4', 1), 0.1),
         walk = anim8.newAnimation(k('1-4', 1), 0.25),
-        run = ""
+        run = "",
+        kick = anim8.newAnimation(l('1-4', 1), 0.1)
     }
 
     entities.players[1].animation = player1_animations.idle
     entities.players[1].facingLeft = false
     entities.players[1].image = p1_idle
     entities.players[1].attackTimer = 0
+
     player2_animations = {
 
     }
@@ -66,9 +63,7 @@ function love.load(arg)
     enemy_animations = {
 
     }
-    -- Assets/player1_idle.png
-    -- Assets/player1_kick.png
-    -- Assets/player1_punch.png
+
     init_world(world)
     -- Init map
     sidewalk_img = love.graphics.newImage("Assets/sidewalk.png")
@@ -152,14 +147,25 @@ function love.update(dt)
     -- For each player update
     for i = 1, #entities.players, 1 do
         local player = entities.players[i]
+        local actualX = player.position.x
+        local actualY = player.position.y
         player.name = "player"..i
         x, y, punch, kick = player:updatePlayer()
-        local intendedX = player.position.x + player.movement_speed * game_speed * x * dt
-        local intendedY = player.position.y + player.movement_speed * game_speed * y * dt
-        local actualX, actualY, cols, len = world:move(player, intendedX, intendedY)
+        if not punch and not kick and player.attackTimer < love.timer.getTime() then
+            intendedX = player.position.x + player.movement_speed * game_speed * x * dt
+            intendedY = player.position.y + player.movement_speed * game_speed * y * dt
+            actualX, actualY, cols, len = world:move(player, intendedX, intendedY)
+        end
         if punch and player.attackTimer < love.timer.getTime() then
             player.animation = player1_animations.punch
             player.image = p1_punch
+            player.attackTimer = love.timer.getTime() + 0.5
+            player.animation:gotoFrame(1)
+        end
+
+        if kick and player.attackTimer < love.timer.getTime() then
+            player.animation = player1_animations.kick
+            player.image = p1_kick
             player.attackTimer = love.timer.getTime() + 0.5
             player.animation:gotoFrame(1)
         end
