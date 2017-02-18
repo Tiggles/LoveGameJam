@@ -2,5 +2,5 @@
 	path = anim8
 	url = https://github.com/kikito/anim8
 [submodule "bump.lua"]
-	path = bump.lua
+	path = bump/
 	url = https://github.com/kikito/bump.lua

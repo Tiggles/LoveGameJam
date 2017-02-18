@@ -9,7 +9,7 @@ debug = true
 screen_values = { width = 1600, height = 960 }
 game_speed = 1
 
-love.window.setMode( screen_values.width, screen_values.height, { resizable = false, vsync = true, minwidth = 1600, minheight= 960 , fullscreen = false })
+love.window.setMode( screen_values.width, screen_values.height, { resizable = true, vsync = true, minwidth = 1600, minheight= 960 , fullscreen = false })
 love.window.setTitle( "Streets of Bitterness" )
 
 entities = {
@@ -43,18 +43,22 @@ function love.load(arg)
 
     p1_idle = love.graphics.newImage("Assets/miniplayer_idle.png")
     local h = anim8.newGrid(64, 104, p1_idle:getWidth(), p1_idle:getHeight())
+    p1_punch = love.graphics.newImage("Assets/miniplayer_punch.png")
+    local j = anim8.newGrid(64, 104, p1_punch:getWidth(), p1_punch:getHeight())
+    p1_walk = love.graphics.newImage("Assets/miniplayer_walk.png")
+    local k = anim8.newGrid(64, 104, p1_punch:getWidth(), p1_punch:getHeight())
 
     player1_animations = {
         idle = anim8.newAnimation(h('1-4', 1), 0.25),
-        punch = "",
-        kick = "",
+        punch = anim8.newAnimation(j('1-4', 1), 0.1),
+        walk = anim8.newAnimation(k('1-4', 1), 0.25),
         run = ""
     }
 
-
     entities.players[1].animation = player1_animations.idle
     entities.players[1].facingLeft = false
-
+    entities.players[1].image = p1_idle
+    entities.players[1].attackTimer = 0
     player2_animations = {
 
     }
@@ -153,19 +157,33 @@ function love.update(dt)
         local intendedX = player.position.x + player.movement_speed * game_speed * x * dt
         local intendedY = player.position.y + player.movement_speed * game_speed * y * dt
         local actualX, actualY, cols, len = world:move(player, intendedX, intendedY)
-        if (x < 0 and not facingLeft) then
+        if punch and player.attackTimer < love.timer.getTime() then
+            player.animation = player1_animations.punch
+            player.image = p1_punch
+            player.attackTimer = love.timer.getTime() + 0.5
+            player.animation:gotoFrame(1)
+        end
+
+        if ((x ~= 0 or y ~= 0) and player.attackTimer < love.timer.getTime()) then
+            player.animation = player1_animations.walk
+            player.image = p1_walk
+        elseif (player.attackTimer < love.timer.getTime()) then
+            player.animation = player1_animations.idle
+            player.image = p1_idle
+        end
+
+        if (x < 0 and not player.animation.flippedH) then
             player.animation:flipH()
-            player.facingLeft = true
-        elseif (x > 0 and facingLeft) then
+        elseif (x > 0 and player.animation.flippedH) then
             player.animation:flipH()
-            player.facingLeft = false
         end
         player.position.x = actualX; player.position.y = actualY;
     end
-    -- For each animation update (move up?)
 end
 
 function love.draw()
+
+    love.graphics.scale(h_scale, v_scale)
 
     if debug then
         debug_info()
@@ -180,7 +198,7 @@ function love.draw()
         --    average_x = average_x + (entities.players[i].position.x - (screen_values.width / 2))
         --end
         --average_x = average_x / #entities.players
-        x_offset = (entities.players[1].position.x - (screen_values.width / 2))--(average_x - (screen_values.width / 2))
+        x_offset = (entities.players[1].position.x - (screen_values.width / 2))
         y_offset = (entities.players[1].position.y - (screen_values.height / 2))
 
         camera_rectangle = {
@@ -197,10 +215,6 @@ function love.draw()
 
     for i = 1, #entities.road.side_walk do
         local sidewalk_slab = entities.road.side_walk[i]
-        print("DEBUG")
-        print(sidewalk_slab)
-        print(#entities.road.side_walk)
-        print(sidewalk_slab.position.x)
         if check_collision(sidewalk_slab, camera_rectangle) then
             love.graphics.draw(sidewalk_img, sidewalk_slab.position.x, sidewalk_slab.position.y, 0, 1, 1, 0, 0, 0, 0)
         end
@@ -224,7 +238,7 @@ function love.draw()
     end
     for i = 1, #entities.players do
         local player = entities.players[i]
-        player.animation:draw(p1_idle, player.position.x, player.position.y, 0, 1, 1)
+        player.animation:draw(player.image, player.position.x, player.position.y, 0, 1, 1)
     end
 
     if debug then
@@ -235,8 +249,9 @@ function love.draw()
     end
 end
 
-function love.resize(w, h)
-    -- Disallow resize for now
+function love.resize(width, height)
+	h_scale = width / screen_values.width
+	v_scale = height / screen_values.height
 end
 
 function debug_info()
