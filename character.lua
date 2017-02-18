@@ -30,13 +30,8 @@ end
 
 function Character:newPlayerChar(x, y, movement_speed, attack_damage)
     local new_player = Character:newCharacter(x, y, 0, movement_speed, attack_damage, 64, 128)
-    new_player.control_scheme = enums.control_schemes.controller
+    new_player.control_scheme = enums.control_schemes.left_control_scheme
     return new_player
-end
-
-function Character:move(new_x, new_y)
-    self.position.x = new_x
-    self.position.y = new_y
 end
 
 function Character:updatePlayer(delta_time)
@@ -104,7 +99,7 @@ function update_as_right(delta_time)
 end
 
 function update_as_controller(delta_time)
-    if love.joystick.getJoystickCount( ) == 0 then return end
+    if love.joystick.getJoystickCount() == 0 then return end
 
     local joystick = love.joystick.getJoysticks()[1]
     print(lastbutton)
@@ -120,13 +115,9 @@ function update_as_controller(delta_time)
     end
     if joystick:isGamepadDown("dpright") then
         x = x + 1
-    else
-        x = joystick:getAxis( 1 )
     end
     if joystick:isGamepadDown("dpup") then
         y = y - 1
-    else
-        y = joystick:getAxis( 2 )
     end
     if joystick:isGamepadDown("dpdown") then
         y = y + 1
@@ -139,6 +130,5 @@ function update_as_controller(delta_time)
     if joystick:isDown(4) then
         kick = true
     end
-    print(x)
     return x, y, punch, kick
 end

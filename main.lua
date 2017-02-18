@@ -17,8 +17,15 @@ entities = {
     enemies = {},
     objects = {},
     road = {
-        side_walk = {},
-        barricades = {}
+        sidewalk = {},
+        street = {},
+        street_lines = {},
+        planks = {},
+        planks_top = {},
+        plank_and_sidewalk = {},
+        barricades = {},
+        gutter = {},
+        flipped_gutter = {}
     },
     background = {}
 }
@@ -31,8 +38,7 @@ end
 function love.load(arg)
     -- Load Textures
     world = bump.newWorld()
-    table.insert(entities.players, Character:newPlayerChar(screen_values.width / 2, screen_values.height * 0.8, 1500, 10))
-    table.insert(entities.enemies, new_grunt(500, 300))
+    table.insert(entities.players, Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10))
 
     p1_idle = love.graphics.newImage("Assets/miniplayer_idle.png")
     local h = anim8.newGrid(64, 104, p1_idle:getWidth(), p1_idle:getHeight())
@@ -46,7 +52,7 @@ function love.load(arg)
     player1_animations = {
         idle = anim8.newAnimation(h('1-4', 1), 0.25),
         punch = anim8.newAnimation(j('1-4', 1), 0.1),
-        walk = anim8.newAnimation(k('1-4', 1), 0.25),
+        walk = anim8.newAnimation(k('1-4', 1), 0.1),
         run = "",
         kick = anim8.newAnimation(l('1-4', 1), 0.1)
     }
@@ -63,22 +69,18 @@ function love.load(arg)
     enemy_animations = {
 
     }
-
-    init_world(world)
     -- Init map
-    sidewalk_img = love.graphics.newImage("Assets/sidewalk.png")
     barricade_img = love.graphics.newImage("Assets/barricade.png")
-    -- Init objects
-    for i = 0, 276 do
-        table.insert(entities.road.side_walk, {
-            position = {
-                x = 58 * i,
-                y = 510
-            },
-            width = 64,
-            height = 64
-         })
-    end
+    street = love.graphics.newImage("Assets/asphalt.png")
+    print("qyadd")
+    asphalt = love.graphics.newQuad(0, 0, 64, 64, street:getWidth(), street:getHeight())
+    plank_and_sidewalk = love.graphics.newQuad(64, 0, 64, 64, street:getWidth(), street:getHeight())
+    plank = love.graphics.newQuad(128, 0, 64, 64, street:getWidth(), street:getHeight())
+    plank_top = love.graphics.newQuad(192, 0, 64, 64, street:getWidth(), street:getHeight())
+    gutter = love.graphics.newQuad(192 + 64, 0, 64, 64, street:getWidth(), street:getHeight())
+    sidewalk = love.graphics.newQuad(192 + 64 * 2, 0, 64, 64, street:getWidth(), street:getHeight())
+    street_lines = love.graphics.newQuad(192 + 64 * 3, 0, 64, 64, street:getWidth(), street:getHeight())
+    init_world(world)
 end
 
 function init_world(world)
@@ -94,6 +96,19 @@ function init_world(world)
     for i = #entities.objects, -1, 1 do
         local object = entities.objects[i]
         world:add( { name = "object" }, object.position.x, object.position.y, object.width, object.height)
+    end
+
+    for i = 0, 275, 1 do
+        table.insert(entities.road.planks_top, { position = { x = i * 58, y = screen_values.height * (2/5) - 94 - 64 }, width = 64, height = 64 })
+        table.insert(entities.road.planks, { position = { x = i * 58, y = screen_values.height * (2/5) - 94 }, width = 64, height = 64 })
+        table.insert(entities.road.plank_and_sidewalk, { position = { x = i * 58, y = screen_values.height * (2/5) - 30 }, width = 64, height = 64 })
+        table.insert(entities.road.sidewalk, { position = { x = i * 58, y = screen_values.height * (2/5) + 34 }, width = 64, height = 64 })
+        table.insert(entities.road.gutter, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 }, width = 64, height = 64 })
+        table.insert(entities.road.street, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 + 64 }, width = 64, height = 64 })
+        table.insert(entities.road.street, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 + 64 * 2 }, width = 64, height = 64 })
+        table.insert(entities.road.street, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 + 64 * 4 }, width = 64, height = 64 })
+        table.insert(entities.road.street, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 + 64 * 5 }, width = 64, height = 64 })
+        table.insert(entities.road.street_lines, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 + 64 * 3 }, width = 64, height = 64 })
     end
 
     world:add( { name = "left bounding box"}, 5, 0, 1, screen_values.height)
@@ -188,9 +203,7 @@ function love.update(dt)
 end
 
 function love.draw()
-
     love.graphics.scale(h_scale, v_scale)
-
     if debug then
         debug_info()
     end
@@ -219,10 +232,52 @@ function love.draw()
 
     love.graphics.translate(-x_offset, -y_offset)
 
-    for i = 1, #entities.road.side_walk do
-        local sidewalk_slab = entities.road.side_walk[i]
-        if check_collision(sidewalk_slab, camera_rectangle) then
-            love.graphics.draw(sidewalk_img, sidewalk_slab.position.x, sidewalk_slab.position.y, 0, 1, 1, 0, 0, 0, 0)
+    for i = 1, #entities.road.planks do
+        local pands = entities.road.planks[i]
+        if check_collision(pands, camera_rectangle) then
+            love.graphics.draw(street, plank, pands.position.x, pands.position.y)
+        end
+    end
+
+    for i = 1, #entities.road.planks_top do
+        local pands = entities.road.planks_top[i]
+        if check_collision(pands, camera_rectangle) then
+            love.graphics.draw(street, plank_top, pands.position.x, pands.position.y)
+        end
+    end
+
+    for i = 1, #entities.road.plank_and_sidewalk do
+        local pands = entities.road.plank_and_sidewalk[i]
+        if check_collision(pands, camera_rectangle) then
+            love.graphics.draw(street, plank_and_sidewalk, pands.position.x, pands.position.y)
+        end
+    end
+
+    for i = 1, #entities.road.sidewalk do
+        local sw = entities.road.sidewalk[i]
+        if check_collision(sw, camera_rectangle) then
+            love.graphics.draw(street, sidewalk, sw.position.x, sw.position.y)
+        end
+    end
+
+    for i = 1, #entities.road.gutter do
+        local g = entities.road.gutter[i]
+        if check_collision(g, camera_rectangle) then
+            love.graphics.draw(street, gutter, g.position.x, g.position.y)
+        end
+    end
+
+    for i = 1, #entities.road.street do
+        local s = entities.road.street[i]
+        if check_collision(s, camera_rectangle) then
+            love.graphics.draw(street, asphalt, s.position.x, s.position.y)
+        end
+    end
+
+    for i = 1, #entities.road.street_lines do
+        local sl = entities.road.street_lines[i]
+        if check_collision(sl, camera_rectangle) then
+            love.graphics.draw(street, street_lines, sl.position.x, sl.position.y)
         end
     end
 
@@ -247,7 +302,8 @@ function love.draw()
         player.animation:draw(player.image, player.position.x, player.position.y, 0, 1, 1)
     end
 
-    if debug then
+
+    if false then
         love.graphics.rectangle("fill", 5, 0, 1, screen_values.height)
         love.graphics.rectangle("fill", 5, screen_values.height * (2/5), screen_values.width * 10, 1)
         love.graphics.rectangle("fill", 5, screen_values.height * 0.9, screen_values.width * 10, 1)
