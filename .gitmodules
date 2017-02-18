@@ -1,0 +1,6 @@
+[submodule "anim8"]
+	path = anim8
+	url = https://github.com/kikito/anim8
+[submodule "bump.lua"]
+	path = bump.lua
+	url = https://github.com/kikito/bump.lua
