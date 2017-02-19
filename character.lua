@@ -21,11 +21,24 @@ function Character:newEnemy(x, y, movement_speed, attack_damage, width, height)
 end
 
 function new_grunt(x, y)
-    return Character:newEnemy(x, y, 0, 10, 5, 64, 128)
+    local char = Character:newEnemy(x, y, 0, 10, 5, 64, 128)
+    char.kind = "grunt"
+    return char
 end
 
 function new_heavy(x, y)
-    return Character:newEnemy(x, y, 0, 5, 10, 64, 128)
+    local char = Character:newEnemy(x, y, 0, 5, 10, 64, 128)
+    char.kind = "heavy"
+    return char
+end
+
+function Character:Update()
+    if self.kind == "heavy" then
+
+    end
+    if self.kind == "grunt" then
+
+    end
 end
 
 function Character:newPlayerChar(x, y, movement_speed, attack_damage)
@@ -43,6 +56,8 @@ function Character:updatePlayer(delta_time)
         return update_as_controller()
     end
 end
+
+
 
 function update_as_left(delta_time)
     local x = 0

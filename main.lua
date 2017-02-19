@@ -37,6 +37,7 @@ end
 
 function love.load(arg)
     -- Load Textures
+    love.graphics.newImageFont("Assets/PressStart2P.ttf", "ABCDEFG", extraspacing)
     world = bump.newWorld()
     table.insert(entities.players, Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10))
 
@@ -62,13 +63,6 @@ function love.load(arg)
     entities.players[1].image = p1_idle
     entities.players[1].attackTimer = 0
 
-
-
-
-    player2_animations = {
-
-    }
-
     e_punk_idle = love.graphics.newImage("Assets/minienemy1_idle.png")
     local epi = anim8.newGrid(64, 104, e_punk_idle:getWidth(), e_punk_idle:getHeight())
     e_punk_kick = love.graphics.newImage("Assets/minienemy1_kick.png")
@@ -78,19 +72,43 @@ function love.load(arg)
     e_punk_walk = love.graphics.newImage("Assets/minienemy1_walk.png")
     local epw = anim8.newGrid(64, 104, e_punk_walk:getWidth(), e_punk_walk:getHeight())
 
+    e_heavy_idle = love.graphics.newImage("Assets/minienemy2_idle.png")
+    local ehi = anim8.newGrid(64, 104, e_heavy_idle:getWidth(), e_heavy_idle:getHeight())
+    e_heavy_kick = love.graphics.newImage("Assets/minienemy2_kick.png")
+    local ehk = anim8.newGrid(64, 104, e_heavy_kick:getWidth(), e_heavy_kick:getHeight())
+    e_heavy_punch = love.graphics.newImage("Assets/minienemy2_punch.png")
+    local ehp = anim8.newGrid(64, 104, e_heavy_punch:getWidth(), e_heavy_punch:getHeight())
+    e_heavy_walk = love.graphics.newImage("Assets/minienemy2_walk.png")
+    local ehw = anim8.newGrid(64, 104, e_heavy_walk:getWidth(), e_heavy_walk:getHeight())
+
     enemy_animations = {
         punk = {
-            idle = anim8.newAnimation(epi('1-4', 1), 0.1),
+            idle = anim8.newAnimation(epi('1-4', 1), 0.25),
             kick = anim8.newAnimation(epk('1-4', 1), 0.1),
             punch = anim8.newAnimation(epp('1-4', 1), 0.1),
-            walk = anim8.newAnimation(epw('1-4', 1), 0.1),
+            walk = anim8.newAnimation(epw('1-4', 1), 0.1)
         },
-        fatty = {}
+        fatty = {
+            idle = anim8.newAnimation(ehi('1-4', 1), 0.25),
+            kick = anim8.newAnimation(ehk('1-4', 1), 0.1),
+            punch = anim8.newAnimation(ehp('1-4', 1), 0.1),
+            walk = anim8.newAnimation(ehw('1-4', 1), 0.1)
+        }
     }
     -- Init map
-    barricade_img = love.graphics.newImage("Assets/barricade.png")
+    cars = love.graphics.newImage("Assets/cars.png")
+    green_car = love.graphics.newQuad(0, 0, 128, 128, cars:getWidth(), cars:getHeight())
+    yellow_car = love.graphics.newQuad(128, 0, 128, 128, cars:getWidth(), cars:getHeight())
+    red_car = love.graphics.newQuad(256, 0, 128, 128, cars:getWidth(), cars:getHeight())
+    blue_car = love.graphics.newQuad(256 + 128, 0, 128, 128, cars:getWidth(), cars:getHeight())
+
+    obstacles = love.graphics.newImage("Assets/obstacles_small.png")
+    standing_barrel = love.graphics.newQuad(0, 0, 64, 64, obstacles:getWidth(), obstacles:getHeight())
+    vertical_barrel = love.graphics.newQuad(64, 0, 64, 64, obstacles:getWidth(), obstacles:getHeight())
+    diagonal_barrel = love.graphics.newQuad(128, 0, 64, 64, obstacles:getWidth(), obstacles:getHeight())
+    barricade_quad = love.graphics.newQuad(128 + 64, 0, 64, 64, obstacles:getWidth(), obstacles:getHeight())
+
     street = love.graphics.newImage("Assets/asphalt.png")
-    print("qyadd")
     asphalt = love.graphics.newQuad(0, 0, 64, 64, street:getWidth(), street:getHeight())
     plank_and_sidewalk = love.graphics.newQuad(64, 0, 64, 64, street:getWidth(), street:getHeight())
     plank = love.graphics.newQuad(128, 0, 64, 64, street:getWidth(), street:getHeight())
@@ -302,7 +320,7 @@ function love.draw()
     for i = 1, #entities.road.barricades do
         local barricade = entities.road.barricades[i]
         if check_collision(barricade, camera_rectangle) then
-            love.graphics.draw(barricade_img, barricade.position.x, barricade.position.y, 0, 1, 1, 0, 0, 0, 0)
+            love.graphics.draw(obstacles, barricade_quad, barricade.position.x, barricade.position.y)
         end
     end
     for i = 1, #entities.enemies do
