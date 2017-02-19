@@ -37,7 +37,8 @@ end
 
 function love.load(arg)
     -- Load Textures
-    love.graphics.newImageFont("Assets/PressStart2P.ttf", "ABCDEFG", extraspacing)
+    font = love.graphics.newFont("Assets/PressStart2P.ttf", 16)
+    love.graphics.setFont(font)
     world = bump.newWorld()
     table.insert(entities.players, Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10))
 
@@ -266,8 +267,9 @@ function love.draw()
         }
     end
 
-    love.graphics.translate(-x_offset, -y_offset)
+    love.graphics.translate(-x_offset, 0)
 
+    -- planks
     for i = 1, #entities.road.planks do
         local pands = entities.road.planks[i]
         if check_collision(pands, camera_rectangle) then
@@ -275,6 +277,7 @@ function love.draw()
         end
     end
 
+    -- Draw top of planks
     for i = 1, #entities.road.planks_top do
         local pands = entities.road.planks_top[i]
         if check_collision(pands, camera_rectangle) then
@@ -282,6 +285,7 @@ function love.draw()
         end
     end
 
+    -- Draw plank and sidewalk combo
     for i = 1, #entities.road.plank_and_sidewalk do
         local pands = entities.road.plank_and_sidewalk[i]
         if check_collision(pands, camera_rectangle) then
@@ -300,6 +304,15 @@ function love.draw()
         local g = entities.road.gutter[i]
         if check_collision(g, camera_rectangle) then
             love.graphics.draw(street, gutter, g.position.x, g.position.y)
+        end
+    end
+
+    -- Draw gutter flipped
+
+    for i = 1, #entities.road.gutter do
+        local g = entities.road.gutter[i]
+        if check_collision(g, camera_rectangle) then
+            love.graphics.draw(street, gutter, g.position.x + 64, g.position.y + 7 * 64, math.pi)
         end
     end
 
