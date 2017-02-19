@@ -8,9 +8,11 @@ in_focus = false
 debug = true
 screen_values = { width = 1600, height = 960 }
 game_speed = 1
+detection_zone_width = 200
+debug_font_size = 16
 
 love.window.setMode( screen_values.width, screen_values.height, { resizable = true, vsync = true, minwidth = 1600, minheight= 960 , fullscreen = false })
-love.window.setTitle( "Streets of Bitterness" )
+love.window.setTitle( "Wrong Neighborhood" )
 
 entities = {
     players = {},
@@ -37,10 +39,11 @@ end
 
 function love.load(arg)
     -- Load Textures
-    font = love.graphics.newFont("Assets/PressStart2P.ttf", 16)
+    font = love.graphics.newFont("Assets/PressStart2P.ttf", debug_font_size)
     love.graphics.setFont(font)
     world = bump.newWorld()
     table.insert(entities.players, Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10))
+
 
     p1_idle = love.graphics.newImage("Assets/miniplayer_idle.png")
     local h = anim8.newGrid(64, 104, p1_idle:getWidth(), p1_idle:getHeight())
@@ -63,6 +66,7 @@ function love.load(arg)
     entities.players[1].facingLeft = false
     entities.players[1].image = p1_idle
     entities.players[1].attackTimer = 0
+
 
     e_punk_idle = love.graphics.newImage("Assets/minienemy1_idle.png")
     local epi = anim8.newGrid(64, 104, e_punk_idle:getWidth(), e_punk_idle:getHeight())
@@ -117,22 +121,32 @@ function love.load(arg)
     gutter = love.graphics.newQuad(192 + 64, 0, 64, 64, street:getWidth(), street:getHeight())
     sidewalk = love.graphics.newQuad(192 + 64 * 2, 0, 64, 64, street:getWidth(), street:getHeight())
     street_lines = love.graphics.newQuad(192 + 64 * 3, 0, 64, 64, street:getWidth(), street:getHeight())
+
+
+    --- put your persons here
+
+    table.insert(entities.enemies, new_punk(600, 600))
+
+
+    for index, enemy in ipairs(entities.enemies) do
+        enemy.animation:flipH()
+        enemy.triggered = false
+    end
+
+
     init_world(world)
 end
 
 function init_world(world)
-    for i = 1, #entities.enemies, 1 do
-        local enemy = entities.enemies[i]
-        world:add( { name = "enemy" }, enemy.position.x, enemy.position.y, enemy.width, enemy.height)
-    end
     for i = 1, #entities.players, 1 do
         local player = entities.players[i]
         player.name = "player"..i
-        world:add( player , player.position.x, player.position.y, player.width, player.height)
+        world:add( player, player.position.x + 10, player.position.y + 25, player.width - 5, player.height - 30)
     end
-    for i = #entities.objects, -1, 1 do
-        local object = entities.objects[i]
-        world:add( { name = "object" }, object.position.x, object.position.y, object.width, object.height)
+    for i = 1, #entities.enemies, 1 do
+        local enemy= entities.enemies[i]
+        enemy.name = "enemy" .. enemy.kind .. i
+        world:add( enemy, enemy.position.x + 10, enemy.position.y + 25, enemy.width - 5, enemy.height - 30)
     end
 
     for i = 0, 275, 1 do
@@ -188,7 +202,7 @@ function love.update(dt)
     -- For each object update
 
     -- For each enemy update
-    print("Enemies count: " .. #entities.enemies)
+    --print("Enemies count: " .. #entities.enemies)
     for i = #entities.enemies, -1, 1 do
         local enemy = entities.enemies[i]
         enemy:updateEnemy()
@@ -201,7 +215,7 @@ function love.update(dt)
         local player = entities.players[i]
         local actualX = player.position.x
         local actualY = player.position.y
-        player.name = "player"..i
+        player.name = "player" .. i
         x, y, punch, kick = player:updatePlayer()
         if not punch and not kick and player.attackTimer < love.timer.getTime() then
             intendedX = player.position.x + player.movement_speed * game_speed * x * dt
@@ -236,6 +250,54 @@ function love.update(dt)
             player.animation:flipH()
         end
         player.position.x = actualX; player.position.y = actualY;
+    end
+
+    -- Enemy updating for each
+    for i = 1, #entities.enemies do
+        local current_enemy = entities.enemies[i]
+        current_enemy.animation:update(dt)
+        local en_pos_x = current_enemy.position.x
+        local en_pos_y = current_enemy.position.y
+
+        for index, player in ipairs(entities.players) do
+            
+            if en_pos_x <= player.position.x + detection_zone_width or en_pos_x <= player.position.x - detection_zone_width then
+                current_enemy.triggered = true
+            else
+                current_enemy.triggered = false
+            end
+
+            if en_pos_x > player.position.x + player.width then
+                -- go from right to left
+                if current_enemy.triggered then
+                    local intendedX = current_enemy.position.x - current_enemy.movement_speed * dt
+                    local intendedY = current_enemy.position.y
+                    local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
+                    current_enemy.position.x = actualX
+                    current_enemy.position.y = actualY
+                    current_enemy.animation = enemy_animations.punk.walk
+                    current_enemy.image = e_punk_walk
+                    if not current_enemy.animation.flippedH then
+                        current_enemy.animation:flipH()
+                    end
+                end
+
+            elseif en_pos_x < player.position.x then
+                local intendedX = current_enemy.position.x + current_enemy.movement_speed * dt
+                local intendedY = current_enemy.position.y
+                local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
+                current_enemy.position.x = actualX
+                current_enemy.position.y = actualY
+                current_enemy.animation = enemy_animations.punk.walk
+                current_enemy.image = e_punk_walk
+                if current_enemy.animation.flippedH then
+                    current_enemy.animation:flipH()
+                end
+            else
+                current_enemy.animation = enemy_animations.punk.idle
+                current_enemy.image = e_punk_idle
+            end
+        end
     end
 end
 
@@ -339,7 +401,8 @@ function love.draw()
     for i = 1, #entities.enemies do
         local enemy = entities.enemies[i]
         if check_collision(enemy, camera_rectangle) then
-            love.graphics.rectangle("fill", enemy.position.x, enemy.position.y, enemy.width, enemy.height)
+            enemy.animation:draw(enemy.image, enemy.position.x, enemy.position.y, 0, 1, 1)
+            --love.graphics.draw(, enemy.position.x, enemy.position.y, enemy.width, enemy.height)
         end
         --enemy.animation:draw(enemy.image, enemy.position.x, enemy.position.y, 0, 1, 1)
     end
@@ -352,11 +415,13 @@ function love.draw()
     end
 
 
-    if false then
+    if debug then
+        draw_debuxes()
         love.graphics.rectangle("fill", 5, 0, 1, screen_values.height)
         love.graphics.rectangle("fill", 5, screen_values.height * (2/5), screen_values.width * 10, 1)
         love.graphics.rectangle("fill", 5, screen_values.height * 0.9, screen_values.width * 10, 1)
         love.graphics.rectangle("fill", screen_values.width * 10, 0, 1, screen_values.height)
+        love.graphics.rectangle("line", entities.players[1].position.x + detection_zone_width, 0, 1, screen_values.height )
     end
 end
 
@@ -365,9 +430,22 @@ function love.resize(width, height)
 	v_scale = height / screen_values.height
 end
 
+function draw_debuxes()
+    local colItems, len = world:getItems()
+    for i = 1, len do
+        local x,y,w,h = world:getRect(colItems[i])
+        love.graphics.rectangle("line", x, y, w, h)
+    end
+end
+
 function debug_info()
 
-    love.graphics.printf("FPS: " .. love.timer.getFPS(), 20, 10, 1000, "left" )
-    love.graphics.printf("Player1.x: " .. entities.players[1].position.x, 20, 20, 1000, "left" )
-    love.graphics.printf("Player1.y: " .. entities.players[1].position.y, 20, 30, 1000, "left" )
+    love.graphics.printf("FPS: " .. love.timer.getFPS(), 20, 1 * debug_font_size, 1000, "left" )
+    love.graphics.printf("Player1.x: " .. entities.players[1].position.x, 20, 2 * debug_font_size, 1000, "left" )
+    love.graphics.printf("Player1.y: " .. entities.players[1].position.y, 20, 3 * debug_font_size, 1000, "left" )
+    love.graphics.printf("enemy1.x: " .. entities.enemies[1].position.x, 20, 4 * debug_font_size, 1000, "left" )
+    love.graphics.printf("enemy1.y: " .. entities.enemies[1].position.y, 20, 5 * debug_font_size, 1000, "left" )
+    love.graphics.printf("enemy1 within trigger field? " .. tostring(entities.enemies[1].position.x <= entities.players[1].position.x + detection_zone_width), 
+        20, 6 * debug_font_size, 1000, "left")
+    love.graphics.printf("enemy1 triggered? " .. tostring(entities.enemies[1].triggered), 20, 7 * debug_font_size, 1000, "left")
 end

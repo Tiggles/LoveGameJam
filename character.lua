@@ -20,14 +20,16 @@ function Character:newEnemy(x, y, movement_speed, attack_damage, width, height)
     return new_enemy
 end
 
-function new_grunt(x, y)
-    local char = Character:newEnemy(x, y, 0, 10, 5, 64, 128)
-    char.kind = "grunt"
+function new_punk(x, y)
+    local char = Character:newEnemy(x, y, 200, 10, 64 - 10, 128 - 26)
+    char.kind = "punk"
+    char.animation = enemy_animations.punk.idle
+    char.image = e_punk_idle
     return char
 end
 
 function new_heavy(x, y)
-    local char = Character:newEnemy(x, y, 0, 5, 10, 64, 128)
+    local char = Character:newEnemy(x, y, 5, 10, 64, 128)
     char.kind = "heavy"
     return char
 end
@@ -36,13 +38,13 @@ function Character:Update()
     if self.kind == "heavy" then
 
     end
-    if self.kind == "grunt" then
+    if self.kind == "punk" then
 
     end
 end
 
 function Character:newPlayerChar(x, y, movement_speed, attack_damage)
-    local new_player = Character:newCharacter(x, y, 0, movement_speed, attack_damage, 64, 128)
+    local new_player = Character:newCharacter(x, y, 0, movement_speed, attack_damage, 52, 90)
     new_player.control_scheme = enums.control_schemes.left_control_scheme
     return new_player
 end
