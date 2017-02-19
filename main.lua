@@ -62,12 +62,30 @@ function love.load(arg)
     entities.players[1].image = p1_idle
     entities.players[1].attackTimer = 0
 
+
+
+
     player2_animations = {
 
     }
 
-    enemy_animations = {
+    e_punk_idle = love.graphics.newImage("Assets/minienemy1_idle.png")
+    local epi = anim8.newGrid(64, 104, e_punk_idle:getWidth(), e_punk_idle:getHeight())
+    e_punk_kick = love.graphics.newImage("Assets/minienemy1_kick.png")
+    local epk = anim8.newGrid(64, 104, e_punk_kick:getWidth(), e_punk_kick:getHeight())
+    e_punk_punch = love.graphics.newImage("Assets/minienemy1_punch.png")
+    local epp = anim8.newGrid(64, 104, e_punk_punch:getWidth(), e_punk_punch:getHeight())
+    e_punk_walk = love.graphics.newImage("Assets/minienemy1_walk.png")
+    local epw = anim8.newGrid(64, 104, e_punk_walk:getWidth(), e_punk_walk:getHeight())
 
+    enemy_animations = {
+        punk = {
+            idle = anim8.newAnimation(epi('1-4', 1), 0.1),
+            kick = anim8.newAnimation(epk('1-4', 1), 0.1),
+            punch = anim8.newAnimation(epp('1-4', 1), 0.1),
+            walk = anim8.newAnimation(epw('1-4', 1), 0.1),
+        },
+        fatty = {}
     }
     -- Init map
     barricade_img = love.graphics.newImage("Assets/barricade.png")
