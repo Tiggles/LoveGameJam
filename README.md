@@ -2,7 +2,9 @@
 
 # LÖVE2d GAMEJAM
 
-Coding by Tiggles, sprites by Ezbob
+Coding by Tiggles, Ezbob
+
+Art by Ezbob
 
 ### How to run it
 
