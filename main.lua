@@ -138,15 +138,21 @@ function love.load(arg)
 end
 
 function init_world(world)
+
+
+
+
     for i = 1, #entities.players, 1 do
         local player = entities.players[i]
+        player.position.y, player.height = player.position.y, player.height
         player.name = "player"..i
-        world:add( player, player.position.x + 10, player.position.y + 25, player.width - 5, player.height - 30)
+        world:add( player, player.position.x, player.position.y, player.width, player.height)
     end
     for i = 1, #entities.enemies, 1 do
         local enemy= entities.enemies[i]
+        enemy.position.y, enemy.height = enemy.position.y, enemy.height
         enemy.name = "enemy" .. enemy.kind .. i
-        world:add( enemy, enemy.position.x + 10, enemy.position.y + 25, enemy.width - 5, enemy.height - 30)
+        world:add( enemy, enemy.position.x, enemy.position.y, enemy.width, enemy.height)
     end
 
     for i = 0, 275, 1 do
@@ -252,6 +258,8 @@ function love.update(dt)
         player.position.x = actualX; player.position.y = actualY;
     end
 
+
+    local enemy_dead_zone = 15
     -- Enemy updating for each
     for i = 1, #entities.enemies do
         local current_enemy = entities.enemies[i]
@@ -267,9 +275,9 @@ function love.update(dt)
                 current_enemy.triggered = false
             end
 
-            if en_pos_x > player.position.x + player.width then
-                -- go from right to left
-                if current_enemy.triggered then
+            if current_enemy.triggered then
+                if en_pos_x > player.position.x + player.width then
+                    -- go from right to left
                     local intendedX = current_enemy.position.x - current_enemy.movement_speed * dt
                     local intendedY = current_enemy.position.y
                     local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
@@ -280,19 +288,48 @@ function love.update(dt)
                     if not current_enemy.animation.flippedH then
                         current_enemy.animation:flipH()
                     end
+                elseif en_pos_x < player.position.x then
+
+                    local intendedX = current_enemy.position.x + current_enemy.movement_speed * dt
+                    local intendedY = current_enemy.position.y
+                    local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
+                    current_enemy.position.x = actualX
+                    current_enemy.position.y = actualY
+                    current_enemy.animation = enemy_animations.punk.walk
+                    current_enemy.image = e_punk_walk
+                    if current_enemy.animation.flippedH then
+                        current_enemy.animation:flipH()
+                    end
+                end
+                if en_pos_y > player.position.y + enemy_dead_zone then
+                    -- enemy top to down
+                    
+                    local intendedX = current_enemy.position.x 
+                    local intendedY = current_enemy.position.y - current_enemy.movement_speed * dt
+                    local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
+                    current_enemy.position.x = actualX
+                    current_enemy.position.y = actualY
+                    current_enemy.animation = enemy_animations.punk.walk
+                    current_enemy.image = e_punk_walk
+
+                elseif en_pos_y < player.position.y - enemy_dead_zone then
+                    -- enemy down to top
+                    local intendedX = current_enemy.position.x 
+                    local intendedY = current_enemy.position.y + current_enemy.movement_speed * dt
+                    local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
+                    current_enemy.position.x = actualX
+                    current_enemy.position.y = actualY
+                    current_enemy.animation = enemy_animations.punk.walk
+                    current_enemy.image = e_punk_walk
                 end
 
-            elseif en_pos_x < player.position.x then
-                local intendedX = current_enemy.position.x + current_enemy.movement_speed * dt
-                local intendedY = current_enemy.position.y
-                local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
-                current_enemy.position.x = actualX
-                current_enemy.position.y = actualY
-                current_enemy.animation = enemy_animations.punk.walk
-                current_enemy.image = e_punk_walk
-                if current_enemy.animation.flippedH then
-                    current_enemy.animation:flipH()
+                if not (en_pos_x > player.position.x + player.width or en_pos_x < player.position.x
+                    or en_pos_y > player.position.y + enemy_dead_zone or 
+                    en_pos_y < player.position.y - enemy_dead_zone) then
+                    current_enemy.animation = enemy_animations.punk.idle
+                    current_enemy.image = e_punk_idle
                 end
+                
             else
                 current_enemy.animation = enemy_animations.punk.idle
                 current_enemy.image = e_punk_idle
@@ -422,6 +459,8 @@ function love.draw()
         love.graphics.rectangle("fill", 5, screen_values.height * 0.9, screen_values.width * 10, 1)
         love.graphics.rectangle("fill", screen_values.width * 10, 0, 1, screen_values.height)
         love.graphics.rectangle("line", entities.players[1].position.x + detection_zone_width, 0, 1, screen_values.height )
+        love.graphics.rectangle("line", 0, entities.players[1].position.y + (entities.players[1].width / 2), screen_values.width, 1)
+        love.graphics.rectangle("line", 0, entities.enemies[1].position.y + (entities.enemies[1].width / 2), screen_values.width, 1)
     end
 end
 
