@@ -58,7 +58,6 @@ function love.load(arg)
         idle = anim8.newAnimation(h('1-4', 1), 0.25),
         punch = anim8.newAnimation(j('1-4', 1), 0.1),
         walk = anim8.newAnimation(k('1-4', 1), 0.1),
-        run = "",
         kick = anim8.newAnimation(l('1-4', 1), 0.1)
     }
 
@@ -132,7 +131,6 @@ function love.load(arg)
         enemy.animation:flipH()
         enemy.triggered = false
     end
-
 
     init_world(world)
 end
@@ -229,17 +227,11 @@ function love.update(dt)
             actualX, actualY, cols, len = world:move(player, intendedX, intendedY)
         end
         if punch and player.attackTimer < love.timer.getTime() then
-            player.animation = player1_animations.punch
-            player.image = p1_punch
-            player.attackTimer = love.timer.getTime() + 0.5
-            player.animation:gotoFrame(1)
+            player:punch(player.name)
         end
 
         if kick and player.attackTimer < love.timer.getTime() then
-            player.animation = player1_animations.kick
-            player.image = p1_kick
-            player.attackTimer = love.timer.getTime() + 0.5
-            player.animation:gotoFrame(1)
+            player:kick(player.name)
         end
 
         if ((x ~= 0 or y ~= 0) and player.attackTimer < love.timer.getTime()) then
@@ -268,7 +260,7 @@ function love.update(dt)
         local en_pos_y = current_enemy.position.y
 
         for index, player in ipairs(entities.players) do
-            
+
             if en_pos_x <= player.position.x + detection_zone_width or en_pos_x <= player.position.x - detection_zone_width then
                 current_enemy.triggered = true
             else
@@ -303,8 +295,8 @@ function love.update(dt)
                 end
                 if en_pos_y > player.position.y + enemy_dead_zone then
                     -- enemy top to down
-                    
-                    local intendedX = current_enemy.position.x 
+
+                    local intendedX = current_enemy.position.x
                     local intendedY = current_enemy.position.y - current_enemy.movement_speed * dt
                     local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
                     current_enemy.position.x = actualX
@@ -314,7 +306,7 @@ function love.update(dt)
 
                 elseif en_pos_y < player.position.y - enemy_dead_zone then
                     -- enemy down to top
-                    local intendedX = current_enemy.position.x 
+                    local intendedX = current_enemy.position.x
                     local intendedY = current_enemy.position.y + current_enemy.movement_speed * dt
                     local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
                     current_enemy.position.x = actualX
@@ -324,12 +316,12 @@ function love.update(dt)
                 end
 
                 if not (en_pos_x > player.position.x + player.width or en_pos_x < player.position.x
-                    or en_pos_y > player.position.y + enemy_dead_zone or 
+                    or en_pos_y > player.position.y + enemy_dead_zone or
                     en_pos_y < player.position.y - enemy_dead_zone) then
                     current_enemy.animation = enemy_animations.punk.idle
                     current_enemy.image = e_punk_idle
                 end
-                
+
             else
                 current_enemy.animation = enemy_animations.punk.idle
                 current_enemy.image = e_punk_idle
@@ -484,7 +476,7 @@ function debug_info()
     love.graphics.printf("Player1.y: " .. entities.players[1].position.y, 20, 3 * debug_font_size, 1000, "left" )
     love.graphics.printf("enemy1.x: " .. entities.enemies[1].position.x, 20, 4 * debug_font_size, 1000, "left" )
     love.graphics.printf("enemy1.y: " .. entities.enemies[1].position.y, 20, 5 * debug_font_size, 1000, "left" )
-    love.graphics.printf("enemy1 within trigger field? " .. tostring(entities.enemies[1].position.x <= entities.players[1].position.x + detection_zone_width), 
+    love.graphics.printf("enemy1 within trigger field? " .. tostring(entities.enemies[1].position.x <= entities.players[1].position.x + detection_zone_width),
         20, 6 * debug_font_size, 1000, "left")
     love.graphics.printf("enemy1 triggered? " .. tostring(entities.enemies[1].triggered), 20, 7 * debug_font_size, 1000, "left")
 end

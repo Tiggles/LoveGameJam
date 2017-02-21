@@ -35,6 +35,7 @@ function new_heavy(x, y)
 end
 
 function Character:Update()
+    if not self.trigged then return end;
     if self.kind == "heavy" then
 
     end
@@ -59,7 +60,55 @@ function Character:updatePlayer(delta_time)
     end
 end
 
+function Character:punch(name)
+    if name == "player1" then
+        print("punched")
+        self.animation = player1_animations.punch
+        self.image = p1_punch
+        self.attackTimer = love.timer.getTime() + 0.5
+        self.animation:gotoFrame(1)
+    elseif name == "player2" then
+        self.animation = player2_animations.punch
+        self.image = p2_punch
+        self.attackTimer = love.timer.getTime() + 0.5
+        self.animation:gotoFrame(1)
+    elseif name == "heavy" then
+        self.animation = enemy_animations.fatty.punch
+        self.image = ehp
+        self.attackTimer = love.timer.getTime() + 0.5
+        self.animation:gotoFrame(1)
+    elseif name == "punk" then
+        self.animation = enemy_animations.punk.punch
+        self.image = epp
+        self.attackTimer = love.timer.getTime() + 0.5
+        self.animation:gotoFrame(1)
+    end
+end
 
+function Character:kick(name)
+    if name == "player1" then
+        print("kicked")
+        self.animation = player1_animations.kick
+        self.image = p1_kick
+        self.attackTimer = love.timer.getTime() + 0.5
+        self.animation:gotoFrame(1)
+    elseif name == "player2" then
+        self.animation = player2_animations.kick
+        self.image = p2_kick
+        self.attackTimer = love.timer.getTime() + 0.5
+        self.animation:gotoFrame(1)
+    elseif name == "heavy" then
+        self.animation = enemy_animations.fatty.kick
+        self.image = ehk
+        self.attackTimer = love.timer.getTime() + 0.5
+        self.animation:gotoFrame(1)
+    elseif name == "punk" then
+        self.animation = enemy_animations.punk.kick
+        self.image = epk
+        self.attackTimer = love.timer.getTime() + 0.5
+        self.animation:gotoFrame(1)
+    end
+end
 
 function update_as_left(delta_time)
     local x = 0
