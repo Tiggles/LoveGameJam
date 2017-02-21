@@ -47,6 +47,7 @@ end
 function Character:newPlayerChar(x, y, movement_speed, attack_damage)
     local new_player = Character:newCharacter(x, y, 0, movement_speed, attack_damage, 52, 90)
     new_player.control_scheme = enums.control_schemes.left_control_scheme
+    new_player.punching = false; new_player.kicking = false;
     return new_player
 end
 
@@ -60,6 +61,22 @@ function Character:updatePlayer(delta_time)
     end
 end
 
+function Character:death(name)
+    if name == "player1" then
+        self.animation = player1_animations.death
+        self.image = p1_death
+    elseif name == "player2" then
+        self.animation = player2_animations.death
+        self.image = p2_death
+    elseif name == "heavy" then
+        self.animation = enemy_animations.fatty.death
+        self.image = ehd
+    elseif name == "punk" then
+        self.animation = enemy_animations.punk.death
+        self.image = epd
+    end
+end
+
 function Character:punch(name)
     if name == "player1" then
         print("punched")
@@ -67,6 +84,7 @@ function Character:punch(name)
         self.image = p1_punch
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
+        self.punching = true
     elseif name == "player2" then
         self.animation = player2_animations.punch
         self.image = p2_punch
@@ -87,11 +105,11 @@ end
 
 function Character:kick(name)
     if name == "player1" then
-        print("kicked")
         self.animation = player1_animations.kick
         self.image = p1_kick
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
+        self.kicking = true
     elseif name == "player2" then
         self.animation = player2_animations.kick
         self.image = p2_kick

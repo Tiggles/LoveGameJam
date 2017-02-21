@@ -78,6 +78,8 @@ function love.load(arg)
     local epp = anim8.newGrid(64, 104, e_punk_punch:getWidth(), e_punk_punch:getHeight())
     e_punk_walk = love.graphics.newImage("Assets/minienemy1_walk.png")
     local epw = anim8.newGrid(64, 104, e_punk_walk:getWidth(), e_punk_walk:getHeight())
+    e_punk_death = love.graphics.newImage("Assets/minienemy1_death.png")
+    local epd = anim8.newGrid(64, 104, e_punk_death:getWidth(), e_punk_death:getHeight())
 
     e_heavy_idle = love.graphics.newImage("Assets/minienemy2_idle.png")
     local ehi = anim8.newGrid(64, 104, e_heavy_idle:getWidth(), e_heavy_idle:getHeight())
@@ -93,7 +95,8 @@ function love.load(arg)
             idle = anim8.newAnimation(epi('1-4', 1), 0.25),
             kick = anim8.newAnimation(epk('1-4', 1), 0.1),
             punch = anim8.newAnimation(epp('1-4', 1), 0.1),
-            walk = anim8.newAnimation(epw('1-4', 1), 0.1)
+            walk = anim8.newAnimation(epw('1-4', 1), 0.1),
+            death = anim8.newAnimation(epd('1-6', 1), 0.25, "pauseAtEnd")
         },
         fatty = {
             idle = anim8.newAnimation(ehi('1-4', 1), 0.25),
@@ -257,6 +260,8 @@ function love.update(dt)
     local enemy_dead_zone = 15
     -- Enemy updating for each
     for i = 1, #entities.enemies do
+
+
         local current_enemy = entities.enemies[i]
         current_enemy.animation:update(dt)
         local en_pos_x = current_enemy.position.x
