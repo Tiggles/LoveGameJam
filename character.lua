@@ -3,9 +3,10 @@ require "position"
 
 Character = {}
 
-function Character:newCharacter(x, y, z, movement_speed, attack_damage, width, height)
+function Character:newCharacter(x, y, health, movement_speed, attack_damage, width, height)
     local new_character = {
-        position = Position:newPosition(x, y, z),
+        position = Position:newPosition(x, y),
+        health = health,
         movement_speed = movement_speed,
         attack_damage = attack_damage,
         width = width,
@@ -69,7 +70,7 @@ function Character:death(name)
         self.animation = player2_animations.death
         self.image = p2_death
     elseif name == "heavy" then
-        self.animation = enemy_animations.fatty.death
+        self.animation = enemy_animations.fatty.deathx
         self.image = ehd
     elseif name == "punk" then
         self.animation = enemy_animations.punk.death
