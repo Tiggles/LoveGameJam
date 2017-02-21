@@ -53,12 +53,15 @@ function love.load(arg)
     local k = anim8.newGrid(64, 104, p1_punch:getWidth(), p1_punch:getHeight())
     p1_kick = love.graphics.newImage("Assets/miniplayer_kick.png")
     local l = anim8.newGrid(64, 104, p1_kick:getWidth(), p1_kick:getHeight())
+    p1_death = love.graphics.newImage("Assets/miniplayer_death.png")
+    local m = anim8.newGrid(64, 104, p1_death:getWidth(), p1_death:getHeight())
 
     player1_animations = {
         idle = anim8.newAnimation(h('1-4', 1), 0.25),
         punch = anim8.newAnimation(j('1-4', 1), 0.1),
         walk = anim8.newAnimation(k('1-4', 1), 0.1),
-        kick = anim8.newAnimation(l('1-4', 1), 0.1)
+        kick = anim8.newAnimation(l('1-4', 1), 0.1),
+        death = anim8.newAnimation(m('1-4', 1), 0.25, "pauseAtEnd")
     }
 
     entities.players[1].animation = player1_animations.idle
