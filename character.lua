@@ -187,7 +187,6 @@ function update_as_controller(delta_time)
     if love.joystick.getJoystickCount() == 0 then return end
 
     local joystick = love.joystick.getJoysticks()[1]
-    print(lastbutton)
     local x = 0
     local y = 0
     local punch = false
@@ -195,7 +194,7 @@ function update_as_controller(delta_time)
     local jump = false
     if joystick:isGamepadDown("dpleft") then
         x = x - 1
-    else
+    elseif math.abs(joystick:getAxis( 1 )) > 0.2 then 
         x = joystick:getAxis( 1 )
     end
     if joystick:isGamepadDown("dpright") then
@@ -206,7 +205,7 @@ function update_as_controller(delta_time)
     end
     if joystick:isGamepadDown("dpdown") then
         y = y + 1
-    else
+    elseif math.abs(joystick:getAxis( 2 )) > 0.2 then 
         y = joystick:getAxis( 2 )
     end
     if joystick:isDown(3) then
