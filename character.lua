@@ -104,6 +104,34 @@ function Character:punch(name)
     end
 end
 
+function Character:walk(name)
+    if name == "player1" then
+
+    elseif name == "player2" then
+        --do
+    elseif name == "heavy" then
+        --do
+    elseif name == "punk" then
+        self.animation = enemy_animations.punk.walk
+        self.image = epw
+    end
+end
+
+function Character:idle(name)
+    if name == "player1" then
+
+    elseif name == "player2" then
+        self.animation = enemy_animations.player2.idle
+        self.image = p2_idle
+    elseif name == "heavy" then
+        self.animation = enemy_animations.fatty.idle
+        self.image = ehi
+    elseif name == "punk" then
+        self.animation = enemy_animations.punk.idle
+        self.image = epi
+    end
+end
+
 function Character:kick(name)
     if name == "player1" then
         self.animation = player1_animations.kick

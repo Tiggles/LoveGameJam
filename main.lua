@@ -3,6 +3,7 @@ local bump = require "bump/bump"
 local anim8 = require "anim8/anim8"
 require "character"
 require "helper_functions"
+require "ai"
 
 in_focus = false
 debug = true
@@ -143,9 +144,6 @@ end
 
 function init_world(world)
 
-
-
-
     for i = 1, #entities.players, 1 do
         local player = entities.players[i]
         player.position.y, player.height = player.position.y, player.height
@@ -256,86 +254,8 @@ function love.update(dt)
         player.position.x = actualX; player.position.y = actualY;
     end
 
+    AI:update(dt, entities.enemies)
 
-    local enemy_dead_zone = 15
-    -- Enemy updating for each
-    for i = 1, #entities.enemies do
-
-
-        local current_enemy = entities.enemies[i]
-        current_enemy.animation:update(dt)
-        local en_pos_x = current_enemy.position.x
-        local en_pos_y = current_enemy.position.y
-
-        for index, player in ipairs(entities.players) do
-
-            if en_pos_x <= player.position.x + detection_zone_width or en_pos_x <= player.position.x - detection_zone_width then
-                current_enemy.triggered = true
-            else
-                current_enemy.triggered = false
-            end
-
-            if current_enemy.triggered then
-                if en_pos_x > player.position.x + player.width then
-                    -- go from right to left
-                    local intendedX = current_enemy.position.x - current_enemy.movement_speed * dt
-                    local intendedY = current_enemy.position.y
-                    local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
-                    current_enemy.position.x = actualX
-                    current_enemy.position.y = actualY
-                    current_enemy.animation = enemy_animations.punk.walk
-                    current_enemy.image = e_punk_walk
-                    if not current_enemy.animation.flippedH then
-                        current_enemy.animation:flipH()
-                    end
-                elseif en_pos_x < player.position.x then
-
-                    local intendedX = current_enemy.position.x + current_enemy.movement_speed * dt
-                    local intendedY = current_enemy.position.y
-                    local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
-                    current_enemy.position.x = actualX
-                    current_enemy.position.y = actualY
-                    current_enemy.animation = enemy_animations.punk.walk
-                    current_enemy.image = e_punk_walk
-                    if current_enemy.animation.flippedH then
-                        current_enemy.animation:flipH()
-                    end
-                end
-                if en_pos_y > player.position.y + enemy_dead_zone then
-                    -- enemy top to down
-
-                    local intendedX = current_enemy.position.x
-                    local intendedY = current_enemy.position.y - current_enemy.movement_speed * dt
-                    local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
-                    current_enemy.position.x = actualX
-                    current_enemy.position.y = actualY
-                    current_enemy.animation = enemy_animations.punk.walk
-                    current_enemy.image = e_punk_walk
-
-                elseif en_pos_y < player.position.y - enemy_dead_zone then
-                    -- enemy down to top
-                    local intendedX = current_enemy.position.x
-                    local intendedY = current_enemy.position.y + current_enemy.movement_speed * dt
-                    local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
-                    current_enemy.position.x = actualX
-                    current_enemy.position.y = actualY
-                    current_enemy.animation = enemy_animations.punk.walk
-                    current_enemy.image = e_punk_walk
-                end
-
-                if not (en_pos_x > player.position.x + player.width or en_pos_x < player.position.x
-                    or en_pos_y > player.position.y + enemy_dead_zone or
-                    en_pos_y < player.position.y - enemy_dead_zone) then
-                    current_enemy.animation = enemy_animations.punk.idle
-                    current_enemy.image = e_punk_idle
-                end
-
-            else
-                current_enemy.animation = enemy_animations.punk.idle
-                current_enemy.image = e_punk_idle
-            end
-        end
-    end
 end
 
 function love.draw()
@@ -368,19 +288,22 @@ function love.draw()
 
     love.graphics.translate(-x_offset, 0)
 
+
+    --- background ---
+
+    --Draw top of planks
+    for i = 1, #entities.road.planks_top do
+        local pands = entities.road.planks_top[i]
+        if check_collision(pands, camera_rectangle) then
+            love.graphics.draw(street, plank_top, pands.position.x, pands.position.y)
+        end
+    end
+
     -- planks
     for i = 1, #entities.road.planks do
         local pands = entities.road.planks[i]
         if check_collision(pands, camera_rectangle) then
             love.graphics.draw(street, plank, pands.position.x, pands.position.y)
-        end
-    end
-
-    -- Draw top of planks
-    for i = 1, #entities.road.planks_top do
-        local pands = entities.road.planks_top[i]
-        if check_collision(pands, camera_rectangle) then
-            love.graphics.draw(street, plank_top, pands.position.x, pands.position.y)
         end
     end
 
@@ -429,6 +352,9 @@ function love.draw()
         end
     end
 
+
+    --- end of background ---
+
     for i = 1, #entities.road.barricades do
         local barricade = entities.road.barricades[i]
         if check_collision(barricade, camera_rectangle) then
@@ -443,9 +369,11 @@ function love.draw()
         end
         --enemy.animation:draw(enemy.image, enemy.position.x, enemy.position.y, 0, 1, 1)
     end
+    --[[
     for i = #entities.objects, -1, 1 do
 
     end
+    ]]--
     for i = 1, #entities.players do
         local player = entities.players[i]
         player.animation:draw(player.image, player.position.x, player.position.y, 0, 1, 1)
@@ -459,8 +387,8 @@ function love.draw()
         love.graphics.rectangle("fill", 5, screen_values.height * 0.9, screen_values.width * 10, 1)
         love.graphics.rectangle("fill", screen_values.width * 10, 0, 1, screen_values.height)
         love.graphics.rectangle("line", entities.players[1].position.x + detection_zone_width, 0, 1, screen_values.height )
-        love.graphics.rectangle("line", 0, entities.players[1].position.y + (entities.players[1].width / 2), screen_values.width, 1)
-        love.graphics.rectangle("line", 0, entities.enemies[1].position.y + (entities.enemies[1].width / 2), screen_values.width, 1)
+        --love.graphics.rectangle("line", 0, entities.players[1].position.y + (entities.players[1].width / 2), screen_values.width, 1)
+        --love.graphics.rectangle("line", 0, entities.enemies[1].position.y + (entities.enemies[1].width / 2), screen_values.width, 1)
     end
 end
 
