@@ -164,9 +164,6 @@ function init_world(world)
         table.insert(entities.road.sidewalk, { position = { x = i * 58, y = screen_values.height * (2/5) + 34 }, width = 64, height = 64 })
         table.insert(entities.road.gutter, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 }, width = 64, height = 64 })
         table.insert(entities.road.street, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 + 64 }, width = 64, height = 64 })
-        table.insert(entities.road.street, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 + 64 * 2 }, width = 64, height = 64 })
-        table.insert(entities.road.street, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 + 64 * 4 }, width = 64, height = 64 })
-        table.insert(entities.road.street, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 + 64 * 5 }, width = 64, height = 64 })
         table.insert(entities.road.street_lines, { position = { x = i * 58, y = screen_values.height * (2/5) + 98 + 64 * 3 }, width = 64, height = 64 })
     end
 
@@ -229,6 +226,12 @@ function love.update(dt)
             intendedX = player.position.x + player.movement_speed * game_speed * x * dt
             intendedY = player.position.y + player.movement_speed * game_speed * y * dt
             actualX, actualY, cols, len = world:move(player, intendedX, intendedY)
+        end
+        if x < 0 then
+            player.facingLeft = true
+        end
+        if 0 < x then
+            player.facingLeft = false
         end
         if punch and player.attackTimer < love.timer.getTime() then
             player:punch(player.name)
@@ -342,6 +345,9 @@ function love.draw()
         local s = entities.road.street[i]
         if check_collision(s, camera_rectangle) then
             love.graphics.draw(street, asphalt, s.position.x, s.position.y)
+            love.graphics.draw(street, asphalt, s.position.x, s.position.y + 64)
+            love.graphics.draw(street, asphalt, s.position.x, s.position.y + 64 * 3)
+            love.graphics.draw(street, asphalt, s.position.x, s.position.y + 64 * 4)
         end
     end
 
@@ -415,4 +421,5 @@ function debug_info()
     love.graphics.printf("enemy1 within trigger field? " .. tostring(entities.enemies[1].position.x <= entities.players[1].position.x + detection_zone_width),
         20, 6 * debug_font_size, 1000, "left")
     love.graphics.printf("enemy1 triggered? " .. tostring(entities.enemies[1].triggered), 20, 7 * debug_font_size, 1000, "left")
+    love.graphics.printf("Facing left? " .. tostring(entities.players[1].facingLeft), 20, 8 * debug_font_size, 1000, "left")
 end
