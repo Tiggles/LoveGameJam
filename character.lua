@@ -16,13 +16,13 @@ function Character:newCharacter(x, y, health, movement_speed, attack_damage, wid
     return setmetatable(new_character, self)
 end
 
-function Character:newEnemy(x, y, movement_speed, attack_damage, width, height)
-    local new_enemy = Character:newCharacter(x, y, 0, movement_speed, attack_damage, width, height)
+function Character:newEnemy(x, y, health, movement_speed, attack_damage, width, height)
+    local new_enemy = Character:newCharacter(x, y, health, movement_speed, attack_damage, width, height)
     return new_enemy
 end
 
 function new_punk(x, y)
-    local char = Character:newEnemy(x, y, 50, 10, 64 - 10, 128 - 26)
+    local char = Character:newEnemy(x, y, 50, 200, 10, 64 - 10, 128 - 26)
     char.kind = "punk"
     char.animation = enemy_animations.punk.idle
     char.image = e_punk_idle
@@ -30,7 +30,7 @@ function new_punk(x, y)
 end
 
 function new_heavy(x, y)
-    local char = Character:newEnemy(x, y, 5, 10, 64, 128)
+    local char = Character:newEnemy(x, y, 50, 5, 10, 64, 128)
     char.kind = "heavy"
     return char
 end
