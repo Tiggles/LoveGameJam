@@ -157,6 +157,19 @@ function Character:kick(name)
     end
 end
 
+function Character:handleAttackBoxes()
+    if self.facingLeft then
+        self.punch_box = { x = self.position.x - self.width, y = self.position.y + 20, width = 60, height = 20}
+    elseif not self.facingLeft then
+        self.punch_box = { x = self.position.x + self.width, y = self.position.y + 20, width = 60, height = 20}
+    end
+    if self.facingLeft then
+        self.kick_box = { x = self.position.x - self.width, y = self.position.y + 80, width = 60, height = 20}
+    elseif not self.facingLeft then
+        self.kick_box = { x = self.position.x + self.width, y = self.position.y + 80, width = 60, height = 20}
+    end
+end
+
 function update_as_left(delta_time)
     local x = 0
     local y = 0

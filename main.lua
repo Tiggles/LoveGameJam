@@ -33,6 +33,8 @@ entities = {
     background = {}
 }
 
+-- DEBUGGING
+punch_box = { x = 0 + 0, y = 0, width = 60, height = 20}
 
 function love.focus(focus)
     in_focus = focus
@@ -249,6 +251,9 @@ function love.update(dt)
             player.image = p1_idle
         end
 
+
+        player:handleAttackBoxes()
+
         if (x < 0 and not player.animation.flippedH) then
             player.animation:flipH()
         elseif (x > 0 and player.animation.flippedH) then
@@ -408,6 +413,16 @@ function draw_debuxes()
     for i = 1, len do
         local x,y,w,h = world:getRect(colItems[i])
         love.graphics.rectangle("line", x, y, w, h)
+    end
+    if entities.players[1].punch_box.isActive then
+        love.graphics.rectangle("fill", entities.players[1].punch_box.x, entities.players[1].punch_box.y, entities.players[1].punch_box.width, entities.players[1].punch_box.height)
+    else
+        love.graphics.rectangle("line", entities.players[1].punch_box.x, entities.players[1].punch_box.y, entities.players[1].punch_box.width, entities.players[1].punch_box.height)
+    end
+    if entities.players[1].kick_box.isActive then
+        love.graphics.rectangle("fill", entities.players[1].kick_box.x, entities.players[1].kick_box.y, entities.players[1].kick_box.width, entities.players[1].kick_box.height)
+    else
+        love.graphics.rectangle("line", entities.players[1].kick_box.x, entities.players[1].kick_box.y, entities.players[1].kick_box.width, entities.players[1].kick_box.height)
     end
 end
 
