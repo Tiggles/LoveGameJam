@@ -435,4 +435,6 @@ function debug_info()
         20, 6 * debug_font_size, 1000, "left")
     love.graphics.printf("enemy1 triggered? " .. tostring(entities.enemies[1].triggered), 20, 7 * debug_font_size, 1000, "left")
     love.graphics.printf("Facing left? " .. tostring(entities.players[1].facingLeft), 20, 8 * debug_font_size, 1000, "left")
+    love.graphics.printf("player health " .. (entities.players[1].health), 20, 9 * debug_font_size, 1000, "left")
+    love.graphics.printf("enemy health " .. (entities.enemies[1].health), 20, 10 * debug_font_size, 1000, "left")
 end

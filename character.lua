@@ -22,7 +22,7 @@ function Character:newEnemy(x, y, movement_speed, attack_damage, width, height)
 end
 
 function new_punk(x, y)
-    local char = Character:newEnemy(x, y, 200, 10, 64 - 10, 128 - 26)
+    local char = Character:newEnemy(x, y, 50, 10, 64 - 10, 128 - 26)
     char.kind = "punk"
     char.animation = enemy_animations.punk.idle
     char.image = e_punk_idle
@@ -46,7 +46,7 @@ function Character:Update()
 end
 
 function Character:newPlayerChar(x, y, movement_speed, attack_damage)
-    local new_player = Character:newCharacter(x, y, 0, movement_speed, attack_damage, 52, 90)
+    local new_player = Character:newCharacter(x, y, 100, movement_speed, attack_damage, 52, 90)
     new_player.control_scheme = enums.control_schemes.left_control_scheme
     new_player.punching = false; new_player.kicking = false;
     return new_player
