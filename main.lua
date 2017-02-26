@@ -222,7 +222,6 @@ function love.update(dt)
         local player = entities.players[i]
         local actualX = player.position.x
         local actualY = player.position.y
-        player.name = "player" .. i
         x, y, punch, kick = player:updatePlayer()
         if not punch and not kick and player.attackTimer < love.timer.getTime() then
             intendedX = player.position.x + player.movement_speed * game_speed * x * dt
