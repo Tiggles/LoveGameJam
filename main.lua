@@ -407,11 +407,11 @@ function love.resize(width, height)
 end
 
 function draw_debuxes()
-    --[[local colItems, len = world:getItems()
+    local colItems, len = world:getItems()
     for i = 1, len do
         local x,y,w,h = world:getRect(colItems[i])
         love.graphics.rectangle("line", x, y, w, h)
-    end--]]
+    end
     if entities.players[1].punch_box.isActive then
         love.graphics.rectangle("fill", entities.players[1].punch_box.x, entities.players[1].punch_box.y, entities.players[1].punch_box.width, entities.players[1].punch_box.height)
     else
