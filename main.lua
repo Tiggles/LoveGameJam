@@ -33,8 +33,6 @@ entities = {
     background = {}
 }
 
--- DEBUGGING
-punch_box = { x = 0 + 0, y = 0, width = 60, height = 20}
 
 function love.focus(focus)
     in_focus = focus
@@ -151,6 +149,8 @@ function init_world(world)
         player.position.y, player.height = player.position.y, player.height
         player.name = "player"..i
         world:add( player, player.position.x, player.position.y, player.width, player.height)
+        player.punch_box = { x = 0 + 0, y = 0, width = 60, height = 20}
+        player.kick_box = { x = 0 + 0, y = 0, width = 60, height = 20}
     end
     for i = 1, #entities.enemies, 1 do
         local enemy= entities.enemies[i]
@@ -250,8 +250,12 @@ function love.update(dt)
             player.image = p1_idle
         end
 
-
         player:handleAttackBoxes()
+
+        if player.attackTimer < love.timer.getTime() then
+            player.kick_box.isActive = false
+            player.punch_box.isActive = false
+        end
 
         if (x < 0 and not player.animation.flippedH) then
             player.animation:flipH()
@@ -408,11 +412,11 @@ function love.resize(width, height)
 end
 
 function draw_debuxes()
-    local colItems, len = world:getItems()
+    --[[local colItems, len = world:getItems()
     for i = 1, len do
         local x,y,w,h = world:getRect(colItems[i])
         love.graphics.rectangle("line", x, y, w, h)
-    end
+    end--]]
     if entities.players[1].punch_box.isActive then
         love.graphics.rectangle("fill", entities.players[1].punch_box.x, entities.players[1].punch_box.y, entities.players[1].punch_box.width, entities.players[1].punch_box.height)
     else

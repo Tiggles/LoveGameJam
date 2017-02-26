@@ -80,12 +80,12 @@ end
 
 function Character:punch(name)
     if name == "player1" then
-        print("punched")
         self.animation = player1_animations.punch
         self.image = p1_punch
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
         self.punching = true
+        self.punch_box.isActive = true
     elseif name == "player2" then
         self.animation = player2_animations.punch
         self.image = p2_punch
@@ -138,6 +138,7 @@ function Character:kick(name)
         self.image = p1_kick
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
+        self.kick_box.isActive = true
         self.kicking = true
     elseif name == "player2" then
         self.animation = player2_animations.kick
@@ -159,14 +160,14 @@ end
 
 function Character:handleAttackBoxes()
     if self.facingLeft then
-        self.punch_box = { x = self.position.x - self.width, y = self.position.y + 20, width = 60, height = 20}
+        self.punch_box.x = self.position.x - self.width / 2; self.punch_box.y = self.position.y + 50; self.punch_box.width = 50; self.punch_box.height = 20
     elseif not self.facingLeft then
-        self.punch_box = { x = self.position.x + self.width, y = self.position.y + 20, width = 60, height = 20}
+        self.punch_box.x = self.position.x + self.width / 2; self.punch_box.y = self.position.y + 50; self.punch_box.width = 50; self.punch_box.height = 20
     end
     if self.facingLeft then
-        self.kick_box = { x = self.position.x - self.width / 2 + 10, y = self.position.y + 70, width = 40, height = 40}
+        self.kick_box.x = self.position.x - self.width / 2 + 10; self.kick_box.y = self.position.y + 70; self.kick_box.width = 40; self.kick_box.height = 40
     elseif not self.facingLeft then
-        self.kick_box = { x = self.position.x + self.width / 2, y = self.position.y + 70, width = 40, height = 40}
+        self.kick_box.x = self.position.x + self.width / 2; self.kick_box.y = self.position.y + 70; self.kick_box.width = 40; self.kick_box.height = 40
     end
 end
 
