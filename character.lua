@@ -169,6 +169,11 @@ function Character:handleAttackBoxes()
     elseif not self.facingLeft then
         self.kick_box.x = self.position.x + self.width / 2; self.kick_box.y = self.position.y + 70; self.kick_box.width = 40; self.kick_box.height = 40
     end
+
+    if self.attackTimer < love.timer.getTime() then
+        self.kick_box.isActive = false
+        self.punch_box.isActive = false
+    end
 end
 
 function update_as_left(delta_time)

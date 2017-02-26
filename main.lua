@@ -252,11 +252,6 @@ function love.update(dt)
 
         player:handleAttackBoxes()
 
-        if player.attackTimer < love.timer.getTime() then
-            player.kick_box.isActive = false
-            player.punch_box.isActive = false
-        end
-
         if (x < 0 and not player.animation.flippedH) then
             player.animation:flipH()
         elseif (x > 0 and player.animation.flippedH) then
