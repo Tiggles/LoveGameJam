@@ -80,6 +80,27 @@ function AI:update(dt, enemies)
                 current_enemy.animation = enemy_animations.punk.idle
                 current_enemy.image = e_punk_idle
             end
+
+            if player.punch_box.isActive then
+                if check_collision({ position = { x = player.punch_box.x, y = player.punch_box.y}, width = player.punch_box.width, height = player.punch_box.height}, current_enemy) then
+                    print("collided with fist!")
+                    if player.facingLeft then
+                        current_enemy.position.x = current_enemy.position.x - 100
+                    else 
+                        current_enemy.position.x = current_enemy.position.x + 100
+                    end 
+                end
+            end
+
+            if player.kick_box.isActive then
+                if check_collision({ position = { x = player.kick_box.x, y = player.kick_box.y}, width = player.kick_box.width, height = player.kick_box.height}, current_enemy) then
+                    if player.facingLeft then
+                        current_enemy.position.x = current_enemy.position.x - 300
+                    else 
+                        current_enemy.position.x = current_enemy.position.x + 300
+                    end 
+                end
+            end
         end
     end
 end
