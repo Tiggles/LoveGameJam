@@ -158,6 +158,13 @@ function Character:kick(name)
     end
 end
 
+function Character:move(movement_x, movement_y)
+    local intendedX = self.position.x + movement_x
+    local intendedY = self.position.y + movement_y
+    local actualX, actualY, col, len = world:move(self, intendedX, intendedY)
+    self.position.x = actualX; self.position.y = actualY;
+end
+
 function Character:handleAttackBoxes()
     if self.facingLeft then
         self.punch_box.x = self.position.x - self.width / 2; self.punch_box.y = self.position.y + 50; self.punch_box.width = 50; self.punch_box.height = 20

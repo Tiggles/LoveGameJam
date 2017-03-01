@@ -220,13 +220,9 @@ function love.update(dt)
     -- For each player update
     for i = 1, #entities.players, 1 do
         local player = entities.players[i]
-        local actualX = player.position.x
-        local actualY = player.position.y
         x, y, punch, kick = player:updatePlayer()
         if not punch and not kick and player.attackTimer < love.timer.getTime() then
-            intendedX = player.position.x + player.movement_speed * game_speed * x * dt
-            intendedY = player.position.y + player.movement_speed * game_speed * y * dt
-            actualX, actualY, cols, len = world:move(player, intendedX, intendedY)
+            player:move(player.movement_speed * game_speed * x * dt, player.movement_speed * game_speed * y * dt)
         end
         if x < 0 then
             player.facingLeft = true
@@ -257,7 +253,6 @@ function love.update(dt)
         elseif (x > 0 and player.animation.flippedH) then
             player.animation:flipH()
         end
-        player.position.x = actualX; player.position.y = actualY;
     end
 
     AI:update(dt, entities.enemies)
@@ -280,7 +275,7 @@ function love.draw()
         --end
         --average_x = average_x / #entities.players
         x_offset = (entities.players[1].position.x - (screen_values.width / 2))
-        y_offset = (entities.players[1].position.y - (screen_values.height / 2))
+        y_offset = 0
 
         camera_rectangle = {
             position = {

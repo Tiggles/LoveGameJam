@@ -85,9 +85,15 @@ function AI:update(dt, enemies)
                 if check_collision({ position = { x = player.punch_box.x, y = player.punch_box.y}, width = player.punch_box.width, height = player.punch_box.height}, current_enemy) then
                     print("collided with fist!")
                     if player.facingLeft then
-                        current_enemy.position.x = current_enemy.position.x - 100
+                        local intendedX = current_enemy.position.x - 100
+                        local intendedY = current_enemy.position.y
+                        local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
+                        current_enemy.position.x = actualX; current_enemy.position.y = actualY
                     else 
-                        current_enemy.position.x = current_enemy.position.x + 100
+                        local intendedX = current_enemy.position.x + 100
+                        local intendedY = current_enemy.position.y
+                        local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
+                        current_enemy.position.x = actualX; current_enemy.position.y = actualY
                     end 
                 end
             end
@@ -95,9 +101,9 @@ function AI:update(dt, enemies)
             if player.kick_box.isActive then
                 if check_collision({ position = { x = player.kick_box.x, y = player.kick_box.y}, width = player.kick_box.width, height = player.kick_box.height}, current_enemy) then
                     if player.facingLeft then
-                        current_enemy.position.x = current_enemy.position.x - 300
+                        current_enemy:move(-300, 0)
                     else 
-                        current_enemy.position.x = current_enemy.position.x + 300
+                        current_enemy:move(300, 0)
                     end 
                 end
             end
