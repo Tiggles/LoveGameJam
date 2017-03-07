@@ -246,13 +246,15 @@ function love.update(dt)
             player.image = p1_idle
         end
 
-        player:handleAttackBoxes()
-
-        if (x < 0 and not player.animation.flippedH) then
-            player.animation:flipH()
-        elseif (x > 0 and player.animation.flippedH) then
+        if player.facingLeft and not player.animation.flippedH then
             player.animation:flipH()
         end
+
+        if not player.facingLeft and player.animation.flippedH then
+            player.animation:flipH()
+        end
+
+        player:handleAttackBoxes()
     end
 
     AI:update(dt, entities.enemies)
@@ -293,6 +295,7 @@ function love.draw()
     --- background ---
 
     --Draw top of planks
+
     for i = 1, #entities.road.planks_top do
         local pands = entities.road.planks_top[i]
         if check_collision(pands, camera_rectangle) then
@@ -380,7 +383,7 @@ function love.draw()
     ]]--
     for i = 1, #entities.players do
         local player = entities.players[i]
-        player.animation:draw(player.image, player.position.x, player.position.y, 0, 1, 1)
+        player.animation:draw(player.image, player.position.x, player.position.y - 30, 0, 1, 1)
     end
 
 
