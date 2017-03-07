@@ -264,7 +264,7 @@ function love.update(dt)
         player:handleAttackBoxes()
     end
 
-    AI:update(dt, entities.enemies)
+    AI:update(dt, entities.enemies, Score)
 
 end
 

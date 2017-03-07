@@ -4,7 +4,7 @@ AI = {
 }
 
 
-function AI:update(dt, enemies)
+function AI:update(dt, enemies, score_table)
 
 	for i = 1, #enemies do
 
@@ -83,7 +83,10 @@ function AI:update(dt, enemies)
 
             if player.punch_box.isActive then
                 if check_collision({ position = { x = player.punch_box.x, y = player.punch_box.y}, width = player.punch_box.width, height = player.punch_box.height}, current_enemy) then
-                    print("collided with fist!")
+                    print("collided with fist! ")
+
+                    score_table:pushScore(100)
+
                     if player.facingLeft then
                         local intendedX = current_enemy.position.x - 100
                         local intendedY = current_enemy.position.y
@@ -99,6 +102,9 @@ function AI:update(dt, enemies)
             end
 
             if player.kick_box.isActive then
+
+                score_table:pushScore(200)
+
                 if check_collision({ position = { x = player.kick_box.x, y = player.kick_box.y}, width = player.kick_box.width, height = player.kick_box.height}, current_enemy) then
                     if player.facingLeft then
                         current_enemy:move(-300, 0)
