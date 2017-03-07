@@ -4,6 +4,7 @@ local anim8 = require "anim8/anim8"
 require "character"
 require "helper_functions"
 require "ai"
+require "scoring"
 
 in_focus = false
 debug = true
@@ -45,6 +46,7 @@ function love.load(arg)
     world = bump.newWorld()
     table.insert(entities.players, Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10))
 
+    Score:setupTimer(0)
 
     p1_idle = love.graphics.newImage("Assets/miniplayer_idle.png")
     local h = anim8.newGrid(64, 104, p1_idle:getWidth(), p1_idle:getHeight())
@@ -206,6 +208,9 @@ function love.update(dt)
     if love.keyboard.isDown("escape") then
         love.event.quit();
     end
+
+    Score:updateTimer(dt)
+
     -- For each object update
 
     -- For each enemy update
@@ -263,6 +268,9 @@ end
 
 function love.draw()
     love.graphics.scale(h_scale, v_scale)
+
+    Score:drawTimer()
+
     if debug then
         debug_info()
     end

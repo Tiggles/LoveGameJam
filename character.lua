@@ -171,6 +171,7 @@ function Character:handleAttackBoxes()
     elseif not self.facingLeft then
         self.punch_box.x = self.position.x + self.width / 2; self.punch_box.y = self.position.y + 20; self.punch_box.width = 50; self.punch_box.height = 20
     end
+    
     if self.facingLeft then
         self.kick_box.x = self.position.x - self.width / 2 + 10; self.kick_box.y = self.position.y + 40; self.kick_box.width = 40; self.kick_box.height = 40
     elseif not self.facingLeft then
