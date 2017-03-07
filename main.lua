@@ -47,6 +47,7 @@ function love.load(arg)
     table.insert(entities.players, Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10))
 
     Score:setupTimer(0)
+    Score:setupScoreCount(0)
 
     p1_idle = love.graphics.newImage("Assets/miniplayer_idle.png")
     local h = anim8.newGrid(64, 104, p1_idle:getWidth(), p1_idle:getHeight())
@@ -210,6 +211,7 @@ function love.update(dt)
     end
 
     Score:updateTimer(dt)
+    Score:updateScoreCount(dt)
 
     -- For each object update
 
@@ -270,6 +272,7 @@ function love.draw()
     love.graphics.scale(h_scale, v_scale)
 
     Score:drawTimer()
+    Score:drawScoreCount()
 
     if debug then
         debug_info()
