@@ -103,9 +103,10 @@ function AI:update(dt, enemies, score_table)
 
             if player.kick_box.isActive then
 
-                score_table:pushScore(200)
-
                 if check_collision({ position = { x = player.kick_box.x, y = player.kick_box.y}, width = player.kick_box.width, height = player.kick_box.height}, current_enemy) then
+                    
+                    score_table:pushScore(200)
+
                     if player.facingLeft then
                         current_enemy:move(-300, 0)
                     else 
