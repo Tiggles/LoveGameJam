@@ -112,7 +112,7 @@ function Score:updateTimer(dt)
 end
 
 function Score:pushScore(points)
-	table.insert(self.score_count.score_points_queue, points)
+	table.insert(self.score_count.score_points_queue, points * self.score_count.multiplier.multiplier)
 end
 
 function Score:getCurrentScore()
