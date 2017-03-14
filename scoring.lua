@@ -18,7 +18,14 @@ Score = {
 		font_size = 26,
 		position = { x = 0, y = 0 },
 		font = nil,
-		score_points_queue = {}
+		score_points_queue = {},
+		multiplier = {
+			multiplier_suffix = 'x',
+			multiplier = 1,
+			position = { x = 0, y =  0 },
+			font_size = 26,
+			minimum_multiplier = 1
+		}
 	}
 }
 
@@ -70,7 +77,17 @@ function Score:setupScoreCount(start_score, font, font_size, position)
 		self.score_count.position = {x = love.graphics.getWidth() / 2 - text_length / 2 - prefix_length / 2,
 			y = 45 + self.score_count.font_size}
 	end
+end
 
+function Score:setupMultiplier(minimum_multiplier)
+	if minimum_multiplier ~= nil then
+		self.score_count.multiplier.multiplier = minimum_multiplier
+	end
+	self.score_count.multiplier.position = { x = 30, y = 50 }
+end
+
+function Score:addToMultiplier(value)
+	self.score_count.multiplier.multiplier = math.max(self.score_count.multiplier.multiplier + value, self.score_count.multiplier.minimum_multiplier)
 end
 
 function Score:getCurrentGameTime()
@@ -102,6 +119,10 @@ function Score:getCurrentScore()
 	return self.score_count.current_score
 end
 
+function Score:resetMultiplier()
+	self.score_count.multiplier.multiplier = self.score_count.multiplier.minimum_multiplier
+end
+
 function Score:updateScoreCount(dt)
 	local point = poll_score(self)
 	while point ~= nil do
@@ -118,4 +139,10 @@ function Score:drawScoreCount()
 	love.graphics.setFont(old_font)
 end
 
-
+function Score:drawMultiplier()
+	local old_font = love.graphics.getFont()
+	love.graphics.setFont(self.timer.font)
+	love.graphics.printf(string.format("%i", self.score_count.multiplier.multiplier) .. self.score_count.multiplier.multiplier_suffix, self.score_count.multiplier.position.x,
+		self.score_count.multiplier.position.y, self.score_count.overflow_limit, self.score_count.text_align)
+	love.graphics.setFont(old_font)
+end
