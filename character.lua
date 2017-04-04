@@ -41,6 +41,7 @@ end
 
 function Character:Update()
     if not self.trigged then return end;
+
     if self.kind == "heavy" then
 
     end
@@ -98,7 +99,9 @@ end
 function Character:punch(timer)
     name = self:getName()
 
-    if name == "player1" then
+    if self.kicking then return end
+
+    if name == "player1" and not self.punching then
 
         self.animation = player1_animations.punch
         self.image = p1_punch
@@ -106,6 +109,9 @@ function Character:punch(timer)
         self.animation:gotoFrame(1)
         timer.after(self.punch_delay, function()
             self.punch_box.isActive = true
+        end)
+        timer.after(self.punch_delay + 0.3, function()         
+            self.punching = false
         end)
         self.punching = true
     elseif name == "player2" then
@@ -161,13 +167,18 @@ end
 function Character:kick(timer)
     name = self:getName()
 
-    if name == "player1" then
+    if self.punching then return end
+
+    if name == "player1" and not self.kicking then
         self.animation = player1_animations.kick
         self.image = p1_kick
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
         timer.after(self.punch_delay, function()
             self.kick_box.isActive = true    
+        end)
+        timer.after(self.punch_delay + 0.4, function()         
+            self.kicking = false
         end)
         self.kicking = true
     elseif name == "player2" then
