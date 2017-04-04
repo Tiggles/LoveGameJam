@@ -22,7 +22,7 @@ function AI:update(dt, enemies, score_table)
 
             if current_enemy.triggered then
             	--- Horizontal movement
-                if en_pos_x > player.position.x + player.width then
+                if en_pos_x > player.position.x + player.width + 4 then
                     local intendedX = current_enemy.position.x - current_enemy.movement_speed * dt
                     local intendedY = current_enemy.position.y
                     local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
