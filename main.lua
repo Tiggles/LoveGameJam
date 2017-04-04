@@ -1,6 +1,7 @@
 local enums = require "enums"
 local bump = require "bump/bump"
 local anim8 = require "anim8/anim8"
+local Timer = require "hump.timer"
 require "character"
 require "helper_functions"
 require "ai"
@@ -40,11 +41,13 @@ function love.focus(focus)
 end
 
 function love.load(arg)
+
+
     -- Load Textures
     font = love.graphics.newFont("Assets/PressStart2P.ttf", debug_font_size)
     love.graphics.setFont(font)
     world = bump.newWorld()
-    table.insert(entities.players, Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10))
+    table.insert(entities.players, Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10, 1))
 
     Score:setupTimer(0)
     Score:setupScoreCount(0)
@@ -212,6 +215,7 @@ function love.update(dt)
 
     Score:updateTimer(dt)
     Score:updateScoreCount(dt)
+    Timer.update(dt)
 
     -- For each object update
 
@@ -222,12 +226,11 @@ function love.update(dt)
         enemy:updateEnemy()
     end
 
-    entities.players[1].animation:update(dt)
-
     -- For each player update
-    for i = 1, #entities.players, 1 do
-        local player = entities.players[i]
+    for i, player in ipairs(entities.players) do
+        player.animation:update(dt)
         x, y, punch, kick = player:updatePlayer()
+        
         if not punch and not kick and player.attackTimer < love.timer.getTime() then
             player:move(player.movement_speed * game_speed * x * dt, player.movement_speed * game_speed * y * dt)
         end
@@ -238,11 +241,11 @@ function love.update(dt)
             player.facingLeft = false
         end
         if punch and player.attackTimer < love.timer.getTime() then
-            player:punch(player.name)
+            player:punch(Timer)
         end
 
         if kick and player.attackTimer < love.timer.getTime() then
-            player:kick(player.name)
+            player:kick(Timer)
         end
 
         if ((x ~= 0 or y ~= 0) and player.attackTimer < love.timer.getTime()) then
@@ -421,15 +424,18 @@ function draw_debuxes()
         local x,y,w,h = world:getRect(colItems[i])
         love.graphics.rectangle("line", x, y, w, h)
     end
-    if entities.players[1].punch_box.isActive then
-        love.graphics.rectangle("fill", entities.players[1].punch_box.x, entities.players[1].punch_box.y, entities.players[1].punch_box.width, entities.players[1].punch_box.height)
-    else
-        love.graphics.rectangle("line", entities.players[1].punch_box.x, entities.players[1].punch_box.y, entities.players[1].punch_box.width, entities.players[1].punch_box.height)
-    end
-    if entities.players[1].kick_box.isActive then
-        love.graphics.rectangle("fill", entities.players[1].kick_box.x, entities.players[1].kick_box.y, entities.players[1].kick_box.width, entities.players[1].kick_box.height)
-    else
-        love.graphics.rectangle("line", entities.players[1].kick_box.x, entities.players[1].kick_box.y, entities.players[1].kick_box.width, entities.players[1].kick_box.height)
+
+    for index, player in ipairs(entities.players) do
+        if player.punch_box.isActive then
+            love.graphics.rectangle("fill", player.punch_box.x, player.punch_box.y, player.punch_box.width, player.punch_box.height)
+        else
+            love.graphics.rectangle("line", player.punch_box.x, player.punch_box.y, player.punch_box.width, player.punch_box.height)
+        end
+        if player.kick_box.isActive then
+            love.graphics.rectangle("fill", player.kick_box.x, player.kick_box.y, player.kick_box.width, player.kick_box.height)
+        else
+            love.graphics.rectangle("line", player.kick_box.x, player.kick_box.y, player.kick_box.width, player.kick_box.height)
+        end
     end
 end
 

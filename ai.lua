@@ -6,9 +6,8 @@ AI = {
 
 function AI:update(dt, enemies, score_table)
 
-	for i = 1, #enemies do
+	for i, current_enemy in ipairs(enemies) do
 
-        local current_enemy = entities.enemies[i]
         current_enemy.animation:update(dt)
         local en_pos_x = current_enemy.position.x
         local en_pos_y = current_enemy.position.y

@@ -4,3 +4,6 @@
 [submodule "bump.lua"]
 	path = bump
 	url = https://github.com/kikito/bump.lua
+[submodule "hump"]
+	path = hump
+	url = https://github.com/vrld/hump
