@@ -1,6 +1,7 @@
 
 AI = {
-	enemy_dead_zone = 15
+	enemy_dead_zone_y = 15,
+    enemy_dead_zone_x = 10
 }
 
 
@@ -22,7 +23,7 @@ function AI:update(dt, enemies, score_table)
 
             if current_enemy.triggered then
             	--- Horizontal movement
-                if en_pos_x > player.position.x + player.width + 4 then
+                if en_pos_x > player.position.x + player.width + self.enemy_dead_zone_x then
                     local intendedX = current_enemy.position.x - current_enemy.movement_speed * dt
                     local intendedY = current_enemy.position.y
                     local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
@@ -46,7 +47,7 @@ function AI:update(dt, enemies, score_table)
                 end
 
                 --- Vertical movement
-                if en_pos_y > player.position.y + self.enemy_dead_zone then
+                if en_pos_y > player.position.y + self.enemy_dead_zone_y then
                     -- enemy top to down
 
                     local intendedX = current_enemy.position.x
@@ -57,7 +58,7 @@ function AI:update(dt, enemies, score_table)
                     current_enemy.animation = enemy_animations.punk.walk
                     current_enemy.image = e_punk_walk
 
-                elseif en_pos_y < player.position.y - self.enemy_dead_zone then
+                elseif en_pos_y < player.position.y - self.enemy_dead_zone_y then
                     -- enemy down to top
                     local intendedX = current_enemy.position.x
                     local intendedY = current_enemy.position.y + current_enemy.movement_speed * dt
@@ -68,9 +69,9 @@ function AI:update(dt, enemies, score_table)
                     current_enemy.image = e_punk_walk
                 end
 
-                if not (en_pos_x > player.position.x + player.width or en_pos_x < player.position.x
-                    or en_pos_y > player.position.y + self.enemy_dead_zone or
-                    en_pos_y < player.position.y - self.enemy_dead_zone) then
+                if not (en_pos_x > player.position.x + player.width + self.enemy_dead_zone_y or en_pos_x < player.position.x
+                    or en_pos_y > player.position.y + self.enemy_dead_zone_y or
+                    en_pos_y < player.position.y - self.enemy_dead_zone_y) then
                     current_enemy.animation = enemy_animations.punk.idle
                     current_enemy.image = e_punk_idle
                 end
