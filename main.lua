@@ -47,19 +47,25 @@ function love.load(arg)
     font = love.graphics.newFont("Assets/PressStart2P.ttf", debug_font_size)
     love.graphics.setFont(font)
     world = bump.newWorld()
-    table.insert(entities.players, Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10, 1))
+
+    STD_CHR_WIDTH, STD_CHR_HEIGHT = 76, 104
+
+    player1 = Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10, 1, STD_CHR_WIDTH, STD_CHR_HEIGHT)
+    player1.torso_spacing = 28 -- the space from outer canvas box to the characters torso/back
+    player1.head_room = 36 -- the space from the head to the outer canvas box 
+    table.insert(entities.players, player1)
 
     Score:setupTimer(0)
     Score:setupScoreCount(0)
 
     p1_idle = love.graphics.newImage("Assets/miniplayer_idle.png")
-    local h = anim8.newGrid(64, 104, p1_idle:getWidth(), p1_idle:getHeight())
+    local h = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, p1_idle:getWidth(), p1_idle:getHeight())
     p1_punch = love.graphics.newImage("Assets/miniplayer_punch.png")
-    local j = anim8.newGrid(64, 104, p1_punch:getWidth(), p1_punch:getHeight())
+    local j = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, p1_punch:getWidth(), p1_punch:getHeight())
     p1_walk = love.graphics.newImage("Assets/miniplayer_walk.png")
-    local k = anim8.newGrid(64, 104, p1_punch:getWidth(), p1_punch:getHeight())
+    local k = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, p1_punch:getWidth(), p1_punch:getHeight())
     p1_kick = love.graphics.newImage("Assets/miniplayer_kick.png")
-    local l = anim8.newGrid(64, 104, p1_kick:getWidth(), p1_kick:getHeight())
+    local l = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, p1_kick:getWidth(), p1_kick:getHeight())
     p1_death = love.graphics.newImage("Assets/miniplayer_death.png")
     local m = anim8.newGrid(64, 104, p1_death:getWidth(), p1_death:getHeight())
 
@@ -154,9 +160,13 @@ function init_world(world)
         local player = entities.players[i]
         player.position.y, player.height = player.position.y, player.height
         player.name = "player"..i
-        world:add( player, player.position.x, player.position.y, player.width, player.height)
-        player.punch_box = { x = 0 + 0, y = 0, width = 60, height = 20}
-        player.kick_box = { x = 0 + 0, y = 0, width = 60, height = 20}
+
+        print(player.position.x, player.position.y)
+        world:add( player, player.position.x, player.position.y, 
+            player.width, -- - player.torso_spacing, 
+            player.height )-- - player.head_room)
+        player.punch_box = { x = 0, y = 0, width = 45, height = 20}
+        player.kick_box = { x = 0, y = 0, width = 55, height = 20}
     end
     for i = 1, #entities.enemies, 1 do
         local enemy= entities.enemies[i]
@@ -426,6 +436,7 @@ function draw_debuxes()
     end
 
     for index, player in ipairs(entities.players) do
+        --- bounding box for 
         if player.punch_box.isActive then
             love.graphics.rectangle("fill", player.punch_box.x, player.punch_box.y, player.punch_box.width, player.punch_box.height)
         else

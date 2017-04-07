@@ -57,8 +57,8 @@ function Character:getName()
     return self.kind
 end
 
-function Character:newPlayerChar(x, y, movement_speed, attack_damage, id)
-    local new_player = Character:newCharacter(x, y, 100, movement_speed, attack_damage, 52, 90)
+function Character:newPlayerChar(x, y, movement_speed, attack_damage, id, width, height)
+    local new_player = Character:newCharacter(x, y, 100, movement_speed, attack_damage, width, height)
     new_player.control_scheme = enums.control_schemes.left_control_scheme
     new_player.punching = false; new_player.kicking = false;
     new_player.kind = "player"
@@ -208,15 +208,20 @@ end
 
 function Character:handleAttackBoxes()
     if self.facingLeft then
-        self.punch_box.x = self.position.x - self.width / 2; self.punch_box.y = self.position.y + 20; self.punch_box.width = 50; self.punch_box.height = 20
+        self.punch_box.x = self.position.x - self.width / 2; 
+        self.punch_box.y = self.position.y + 20; --self.punch_box.width = 50; self.punch_box.height = 20
     elseif not self.facingLeft then
-        self.punch_box.x = self.position.x + self.width / 2; self.punch_box.y = self.position.y + 20; self.punch_box.width = 50; self.punch_box.height = 20
+        self.punch_box.x = self.position.x + self.width / 2; 
+        self.punch_box.y = self.position.y + 20; --self.punch_box.width = 50; self.punch_box.height = 20
     end
     
     if self.facingLeft then
-        self.kick_box.x = self.position.x - self.width / 2 + 10; self.kick_box.y = self.position.y + 40; self.kick_box.width = 40; self.kick_box.height = 40
+        --print("ha", self.width / 2, self.kick_box.width)
+        self.kick_box.x = self.position.x - self.width / 2; 
+        self.kick_box.y = self.position.y + 40; --self.kick_box.width = 40; self.kick_box.height = 40
     elseif not self.facingLeft then
-        self.kick_box.x = self.position.x + self.width / 2; self.kick_box.y = self.position.y + 40; self.kick_box.width = 40; self.kick_box.height = 40
+        self.kick_box.x = self.position.x + self.width / 2; 
+        self.kick_box.y = self.position.y + 40; --self.kick_box.width = 40; self.kick_box.height = 40
     end
 
     if self.attackTimer < love.timer.getTime() then
