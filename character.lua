@@ -1,8 +1,9 @@
 local enums = require "enums"
 require "position"
-require "inspect/inspect"
+local inspect = require "inspect/inspect"
 
 Character = {}
+
 
 function Character:newCharacter(x, y, health, movement_speed, attack_damage, width, height)
     local new_character = {
@@ -105,8 +106,7 @@ end
 function new_punk(x, y, width, height)
     local char = Character:newEnemy(x, y, 50, 200, 10, width, height)
     char.kind = "punk"
-    char.animation = enemy_animations.punk.idle
-    char.image = e_punk_idle
+    char:setAniState(enums.animation_states.idle)
     char.kick_delay = 0.4
     char.punch_delay = 0.24
     return char
@@ -138,6 +138,16 @@ function Character:getName()
     return self.kind
 end
 
+function Character:setAniState(state)
+    local name = self:getName()
+
+    local charAnimations = animationAssets[name]
+    local charImages = imageAssets[name]
+
+    self.animation = charAnimations[state]
+    self.image = charImages[state]
+end
+
 function Character:newPlayerChar(x, y, movement_speed, attack_damage, id, width, height)
     local new_player = Character:newCharacter(x, y, 100, movement_speed, attack_damage, width, height)
     new_player.control_scheme = enums.control_schemes.left_control_scheme
@@ -161,31 +171,16 @@ end
 
 function Character:death()
     name = self:getName()
-
-    if name == "player1" then
-        self.animation = player1_animations.death
-        self.image = p1_death
-    elseif name == "player2" then
-        self.animation = player2_animations.death
-        self.image = p2_death
-    elseif name == "heavy" then
-        self.animation = enemy_animations.fatty.deathx
-        self.image = ehd
-    elseif name == "punk" then
-        self.animation = enemy_animations.punk.death
-        self.image = epd
-    end
+    self:setAniState('death')
 end
 
 function Character:punch(timer)
-    name = self:getName()
+    local name = self:getName()
 
     if self.kicking then return end
+    self:setAniState('punch')
 
     if name == "player1" and not self.punching then
-
-        self.animation = player1_animations.punch
-        self.image = p1_punch
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
         timer.after(self.punch_delay, function()
@@ -196,18 +191,12 @@ function Character:punch(timer)
         end)
         self.punching = true
     elseif name == "player2" then
-        self.animation = player2_animations.punch
-        self.image = p2_punch
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
     elseif name == "heavy" then
-        self.animation = enemy_animations.fatty.punch
-        self.image = ehp
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
     elseif name == "punk" then
-        self.animation = enemy_animations.punk.punch
-        self.image = epp
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)    
     end
@@ -231,44 +220,21 @@ function Character:faceRight()
 end
 
 function Character:walk()
-    name = self:getName()
-    if name == "player1" then
-
-    elseif name == "player2" then
-        --do
-    elseif name == "heavy" then
-        --do
-    elseif name == "punk" then
-        self.animation = enemy_animations.punk.walk
-        self.image = epw
-    end
+    self:setAniState('walk')
 end
 
 function Character:idle()
-    name = self:getName()
-
-    if name == "player1" then
-
-    elseif name == "player2" then
-        self.animation = enemy_animations.player2.idle
-        self.image = p2_idle
-    elseif name == "heavy" then
-        self.animation = enemy_animations.fatty.idle
-        self.image = ehi
-    elseif name == "punk" then
-        self.animation = enemy_animations.punk.idle
-        self.image = epi
-    end
+    self:setAniState('idle')
 end
 
 function Character:kick(timer)
-    name = self:getName()
+    local name = self:getName()
 
     if self.punching then return end
 
+    self:setAniState('kick')
+
     if name == "player1" and not self.kicking then
-        self.animation = player1_animations.kick
-        self.image = p1_kick
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
         timer.after(self.punch_delay, function()
@@ -279,18 +245,12 @@ function Character:kick(timer)
         end)
         self.kicking = true
     elseif name == "player2" then
-        self.animation = player2_animations.kick
-        self.image = p2_kick
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
     elseif name == "heavy" then
-        self.animation = enemy_animations.fatty.kick
-        self.image = ehk
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
     elseif name == "punk" then
-        self.animation = enemy_animations.punk.kick
-        self.image = epk
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
     end
@@ -417,3 +377,5 @@ function update_as_controller(delta_time)
     end
     return x, y, punch, kick
 end
+
+

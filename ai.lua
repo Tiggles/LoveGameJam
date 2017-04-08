@@ -23,8 +23,6 @@ function AI:update(dt, enemies, score_table)
                 current_enemy.triggered = false
             end
 
-
-
             if current_enemy.triggered then
             	--- Horizontal movement
                 if en_pos_x > player.position.x + w + self.enemy_dead_zone_x then
@@ -33,8 +31,7 @@ function AI:update(dt, enemies, score_table)
                     local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
                     current_enemy.position.x = actualX
                     current_enemy.position.y = actualY
-                    current_enemy.animation = enemy_animations.punk.walk
-                    current_enemy.image = e_punk_walk
+                    current_enemy:setAniState('walk')
                     
                     current_enemy:faceLeft()
 
@@ -58,8 +55,7 @@ function AI:update(dt, enemies, score_table)
                     local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
                     current_enemy.position.x = actualX
                     current_enemy.position.y = actualY
-                    current_enemy.animation = enemy_animations.punk.walk
-                    current_enemy.image = e_punk_walk
+                    current_enemy:setAniState('walk')
 
                 elseif en_pos_y < player.position.y - self.enemy_dead_zone_y then
                     -- enemy down to top
@@ -68,20 +64,17 @@ function AI:update(dt, enemies, score_table)
                     local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
                     current_enemy.position.x = actualX
                     current_enemy.position.y = actualY
-                    current_enemy.animation = enemy_animations.punk.walk
-                    current_enemy.image = e_punk_walk
+                    current_enemy:setAniState('walk')
                 end
 
                 if not (en_pos_x > player.position.x + w + self.enemy_dead_zone_y or en_pos_x < player.position.x
                     or en_pos_y > player.position.y + self.enemy_dead_zone_y or
                     en_pos_y < player.position.y - self.enemy_dead_zone_y) then
-                    current_enemy.animation = enemy_animations.punk.idle
-                    current_enemy.image = e_punk_idle
+                    current_enemy:setAniState('idle')
                 end
 
             else
-                current_enemy.animation = enemy_animations.punk.idle
-                current_enemy.image = e_punk_idle
+                current_enemy:setAniState('idle')
             end
 
             if player.punch_box.isActive then

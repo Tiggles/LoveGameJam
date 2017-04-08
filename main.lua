@@ -47,6 +47,7 @@ function love.load(arg)
     font = love.graphics.newFont("Assets/PressStart2P.ttf", debug_font_size)
     love.graphics.setFont(font)
     world = bump.newWorld()
+    images = {}
 
     STD_CHR_WIDTH, STD_CHR_HEIGHT = 76, 104
 
@@ -70,50 +71,58 @@ function love.load(arg)
     Score:setupTimer(0)
     Score:setupScoreCount(0)
 
-    p1_idle = love.graphics.newImage("Assets/miniplayer_idle.png")
-    local h = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, p1_idle:getWidth(), p1_idle:getHeight())
-    p1_punch = love.graphics.newImage("Assets/miniplayer_punch.png")
-    local j = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, p1_punch:getWidth(), p1_punch:getHeight())
-    p1_walk = love.graphics.newImage("Assets/miniplayer_walk.png")
-    local k = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, p1_punch:getWidth(), p1_punch:getHeight())
-    p1_kick = love.graphics.newImage("Assets/miniplayer_kick.png")
-    local l = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, p1_kick:getWidth(), p1_kick:getHeight())
-    p1_death = love.graphics.newImage("Assets/miniplayer_death.png")
-    local m = anim8.newGrid(64, 104, p1_death:getWidth(), p1_death:getHeight())
-
-    player1_animations = {
-        idle = anim8.newAnimation(h('1-4', 1), 0.25),
-        punch = anim8.newAnimation(j('1-4', 1), 0.1),
-        walk = anim8.newAnimation(k('1-4', 1), 0.1),
-        kick = anim8.newAnimation(l('1-4', 1), 0.1),
-        death = anim8.newAnimation(m('1-4', 1), 0.25, "pauseAtEnd")
+    imageAssets = {
+        player1 = {
+            idle = love.graphics.newImage("Assets/miniplayer_idle.png"),
+            punch = love.graphics.newImage("Assets/miniplayer_punch.png"),
+            walk = love.graphics.newImage("Assets/miniplayer_walk.png"),
+            kick = love.graphics.newImage("Assets/miniplayer_kick.png"),
+            death = love.graphics.newImage("Assets/miniplayer_death.png")
+        },
+        punk = {
+            idle = love.graphics.newImage("Assets/minienemy1_idle.png"),
+            punch = love.graphics.newImage("Assets/minienemy1_punch.png"),
+            walk = love.graphics.newImage("Assets/minienemy1_walk.png"),
+            kick = love.graphics.newImage("Assets/minienemy1_kick.png"),
+            death = love.graphics.newImage("Assets/minienemy1_death.png")
+        },
+        heavy = {
+            idle = love.graphics.newImage("Assets/minienemy2_idle.png"),
+            kick = love.graphics.newImage("Assets/minienemy2_kick.png"),
+            punch = love.graphics.newImage("Assets/minienemy2_punch.png"),
+            walk = love.graphics.newImage("Assets/minienemy2_walk.png")
+        }
     }
 
-    entities.players[1].animation = player1_animations.idle
-    entities.players[1].image = p1_idle
 
+    local char = imageAssets['player1']
+    local h = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.idle:getWidth(), char.idle:getHeight())
+    local j = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.punch:getWidth(), char.punch:getHeight())
+    local k = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.walk:getWidth(), char.walk:getHeight())
+    local l = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.kick:getWidth(), char.kick:getHeight())
+    local m = anim8.newGrid(64, 104, char.death:getWidth(), char.death:getHeight())
 
-    e_punk_idle = love.graphics.newImage("Assets/minienemy1_idle.png")
-    local epi = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, e_punk_idle:getWidth(), e_punk_idle:getHeight())
-    e_punk_kick = love.graphics.newImage("Assets/minienemy1_kick.png")
-    local epk = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, e_punk_kick:getWidth(), e_punk_kick:getHeight())
-    e_punk_punch = love.graphics.newImage("Assets/minienemy1_punch.png")
-    local epp = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, e_punk_punch:getWidth(), e_punk_punch:getHeight())
-    e_punk_walk = love.graphics.newImage("Assets/minienemy1_walk.png")
-    local epw = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, e_punk_walk:getWidth(), e_punk_walk:getHeight())
-    e_punk_death = love.graphics.newImage("Assets/minienemy1_death.png")
-    local epd = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, e_punk_death:getWidth(), e_punk_death:getHeight())
+    char = imageAssets['punk']
+    local epi = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.idle:getWidth(), char.idle:getHeight())
+    local epk = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.kick:getWidth(), char.kick:getHeight())
+    local epp = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.punch:getWidth(), char.punch:getHeight())
+    local epw = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.walk:getWidth(), char.walk:getHeight())
+    local epd = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.death:getWidth(), char.death:getHeight())
 
-    e_heavy_idle = love.graphics.newImage("Assets/minienemy2_idle.png")
-    local ehi = anim8.newGrid(64, 104, e_heavy_idle:getWidth(), e_heavy_idle:getHeight())
-    e_heavy_kick = love.graphics.newImage("Assets/minienemy2_kick.png")
-    local ehk = anim8.newGrid(64, 104, e_heavy_kick:getWidth(), e_heavy_kick:getHeight())
-    e_heavy_punch = love.graphics.newImage("Assets/minienemy2_punch.png")
-    local ehp = anim8.newGrid(64, 104, e_heavy_punch:getWidth(), e_heavy_punch:getHeight())
-    e_heavy_walk = love.graphics.newImage("Assets/minienemy2_walk.png")
-    local ehw = anim8.newGrid(64, 104, e_heavy_walk:getWidth(), e_heavy_walk:getHeight())
+    char = imageAssets['heavy']
+    local ehi = anim8.newGrid(64, 104, char.idle:getWidth(), char.idle:getHeight())
+    local ehk = anim8.newGrid(64, 104, char.kick:getWidth(), char.kick:getHeight())
+    local ehp = anim8.newGrid(64, 104, char.punch:getWidth(), char.punch:getHeight())
+    local ehw = anim8.newGrid(64, 104, char.walk:getWidth(), char.walk:getHeight())
 
-    enemy_animations = {
+    animationAssets = {
+        player1 = {
+            idle = anim8.newAnimation(h('1-4', 1), 0.25),
+            punch = anim8.newAnimation(j('1-4', 1), 0.1),
+            walk = anim8.newAnimation(k('1-4', 1), 0.1),
+            kick = anim8.newAnimation(l('1-4', 1), 0.1),
+            death = anim8.newAnimation(m('1-4', 1), 0.25, "pauseAtEnd")
+        },
         punk = {
             idle = anim8.newAnimation(epi('1-4', 1), 0.25),
             kick = anim8.newAnimation(epk('1-4', 1), 0.1),
@@ -121,7 +130,7 @@ function love.load(arg)
             walk = anim8.newAnimation(epw('1-4', 1), 0.1),
             death = anim8.newAnimation(epd('1-6', 1), 0.25, "pauseAtEnd")
         },
-        fatty = {
+        heavy = {
             idle = anim8.newAnimation(ehi('1-4', 1), 0.25),
             kick = anim8.newAnimation(ehk('1-4', 1), 0.1),
             punch = anim8.newAnimation(ehp('1-4', 1), 0.1),
@@ -150,6 +159,7 @@ function love.load(arg)
     sidewalk = love.graphics.newQuad(192 + 64 * 2, 0, 64, 64, street:getWidth(), street:getHeight())
     street_lines = love.graphics.newQuad(192 + 64 * 3, 0, 64, 64, street:getWidth(), street:getHeight())
 
+    player1:setAniState('idle')
 
     --- put your persons here
 
@@ -165,7 +175,6 @@ function love.load(arg)
     )
 
     table.insert(entities.enemies, punk_enemy)
-
 
     for index, enemy in ipairs(entities.enemies) do
         enemy.animation:flipH()
@@ -276,11 +285,9 @@ function love.update(dt)
         end
 
         if ((x ~= 0 or y ~= 0) and player.attackTimer < love.timer.getTime()) then
-            player.animation = player1_animations.walk
-            player.image = p1_walk
+            player:setAniState('walk')
         elseif (player.attackTimer < love.timer.getTime()) then
-            player.animation = player1_animations.idle
-            player.image = p1_idle
+            player:setAniState('idle')
         end
 
         player:handleAttackBoxes()
