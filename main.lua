@@ -42,7 +42,6 @@ end
 
 function love.load(arg)
 
-
     -- Load Textures
     font = love.graphics.newFont("Assets/PressStart2P.ttf", debug_font_size)
     love.graphics.setFont(font)
@@ -51,8 +50,20 @@ function love.load(arg)
     STD_CHR_WIDTH, STD_CHR_HEIGHT = 76, 104
 
     player1 = Character:newPlayerChar(100, screen_values.height * 0.7, 200, 10, 1, STD_CHR_WIDTH, STD_CHR_HEIGHT)
-    player1.torso_spacing = 28 -- the space from outer canvas box to the characters torso/back
-    player1.head_room = 36 -- the space from the head to the outer canvas box 
+
+    local torso_spacing = 25
+    local head_room = 58
+    local leg_length = 20
+
+    player1:setBboxDimensions(
+        player1.width - (torso_spacing * 2), -- frame width of animation has a padding of 2 * torso spacing to make all frame equal width 
+        player1.height - head_room, -- frame width of animation has a padding head_room (space over the head) to make all frame equal height
+        { -- bounding box frame offsets, for drawing the frame 
+            x = torso_spacing, 
+            y = head_room - leg_length
+        }
+    )
+
     table.insert(entities.players, player1)
 
     Score:setupTimer(0)
@@ -143,7 +154,18 @@ function love.load(arg)
 
     --- put your persons here
 
-    table.insert(entities.enemies, new_punk(600, 600))
+    local punk_enemy = new_punk(600, 600, STD_CHR_WIDTH, STD_CHR_HEIGHT)
+
+    punk_enemy:setBboxDimensions(
+        player1.width - (torso_spacing * 2), -- frame width of animation has a padding of 2 * torso spacing to make all frame equal width 
+        player1.height - head_room, -- frame width of animation has a padding head_room (space over the head) to make all frame equal height
+        { -- bounding box frame offsets, for drawing the frame 
+            x = torso_spacing, 
+            y = head_room - leg_length
+        }
+    )
+
+    table.insert(entities.enemies, punk_enemy)
 
 
     for index, enemy in ipairs(entities.enemies) do
@@ -155,24 +177,25 @@ function love.load(arg)
 end
 
 function init_world(world)
+    local bbox_width, bbox_height
 
     for i = 1, #entities.players, 1 do
         local player = entities.players[i]
         player.position.y, player.height = player.position.y, player.height
         player.name = "player"..i
 
-        print(player.position.x, player.position.y)
-        world:add( player, player.position.x, player.position.y, 
-            player.width, -- - player.torso_spacing, 
-            player.height )-- - player.head_room)
-        player.punch_box = { x = 0, y = 0, width = 45, height = 20}
-        player.kick_box = { x = 0, y = 0, width = 55, height = 20}
+        bbox_width, bbox_height = player:getBboxDimensions()
+        world:add( player, player.position.x, player.position.y, bbox_width, bbox_height)
+        player.punch_box = { x = 0, y = 0, width = 20, height = 20}
+        player.kick_box = { x = 0, y = 0, width = 20, height = 20}
     end
+
     for i = 1, #entities.enemies, 1 do
-        local enemy= entities.enemies[i]
+        local enemy = entities.enemies[i]
         enemy.position.y, enemy.height = enemy.position.y, enemy.height
+        bbox_width, bbox_height = enemy:getBboxDimensions()
         enemy.name = "enemy" .. enemy.kind .. i
-        world:add( enemy, enemy.position.x, enemy.position.y, enemy.width, enemy.height)
+        world:add( enemy, enemy.position.x, enemy.position.y, bbox_width, bbox_height)
     end
 
     for i = 0, 275, 1 do
@@ -395,7 +418,8 @@ function love.draw()
     for i = 1, #entities.enemies do
         local enemy = entities.enemies[i]
         if check_collision(enemy, camera_rectangle) then
-            enemy.animation:draw(enemy.image, enemy.position.x, enemy.position.y, 0, 1, 1)
+            local x, y = enemy:getBboxPosition()
+            enemy.animation:draw(enemy.image, x, y, 0, 1, 1)
             --love.graphics.draw(, enemy.position.x, enemy.position.y, enemy.width, enemy.height)
         end
         --enemy.animation:draw(enemy.image, enemy.position.x, enemy.position.y, 0, 1, 1)
@@ -407,7 +431,8 @@ function love.draw()
     ]]--
     for i = 1, #entities.players do
         local player = entities.players[i]
-        player.animation:draw(player.image, player.position.x, player.position.y - 30, 0, 1, 1)
+        local x,y = player:getBboxPosition()
+        player.animation:draw(player.image, x, y, 0, 1, 1)
     end
 
 

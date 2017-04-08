@@ -10,7 +10,13 @@ function Character:newCharacter(x, y, health, movement_speed, attack_damage, wid
         movement_speed = movement_speed,
         attack_damage = attack_damage,
         width = width,
-        height = height
+        height = height,
+        bbox = { 
+            width = 0, 
+            height = 0, 
+            offsets_x = 0, 
+            offsets_y = 0 
+        }
     }
     self.__index = self
     return setmetatable(new_character, self)
@@ -21,8 +27,31 @@ function Character:newEnemy(x, y, health, movement_speed, attack_damage, width, 
     return new_enemy
 end
 
-function new_punk(x, y)
-    local char = Character:newEnemy(x, y, 50, 200, 10, 64 - 10, 128 - 26)
+function Character:setBboxDimensions(width, height, offsets)
+    if offsets ~= nil then
+        self.bbox.offsets_x = offsets.x
+        self.bbox.offsets_y = offsets.y
+    end
+
+    if width ~= nil then
+        self.bbox.width = width        
+    end
+    if width ~= nil then
+        self.bbox.height = height
+    end
+end
+
+function Character:getBboxDimensions()
+    return self.bbox.width, self.bbox.height
+end
+
+function Character:getBboxPosition()
+    return self.position.x - self.bbox.offsets_x, self.position.y - self.bbox.offsets_y
+end
+
+
+function new_punk(x, y, width, height)
+    local char = Character:newEnemy(x, y, 50, 200, 10, width, height)
     char.kind = "punk"
     char.animation = enemy_animations.punk.idle
     char.image = e_punk_idle
@@ -31,8 +60,8 @@ function new_punk(x, y)
     return char
 end
 
-function new_heavy(x, y)
-    local char = Character:newEnemy(x, y, 50, 5, 10, 52, 90)
+function new_heavy(x, y, width, height)
+    local char = Character:newEnemy(x, y, 50, 5, 10, width, height)
     char.kind = "heavy"
     char.kick_delay = 0.45
     char.punch_delay = 0.27
@@ -209,10 +238,10 @@ end
 function Character:handleAttackBoxes()
     if self.facingLeft then
         self.punch_box.x = self.position.x - self.width / 2; 
-        self.punch_box.y = self.position.y + 20; --self.punch_box.width = 50; self.punch_box.height = 20
+        self.punch_box.y = self.position.y + 16; --self.punch_box.width = 50; self.punch_box.height = 20
     elseif not self.facingLeft then
         self.punch_box.x = self.position.x + self.width / 2; 
-        self.punch_box.y = self.position.y + 20; --self.punch_box.width = 50; self.punch_box.height = 20
+        self.punch_box.y = self.position.y + 16; --self.punch_box.width = 50; self.punch_box.height = 20
     end
     
     if self.facingLeft then
