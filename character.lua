@@ -214,6 +214,22 @@ function Character:punch(timer)
 
 end
 
+function Character:isFacingLeft()
+    return self.animation.flippedH
+end
+
+function Character:faceLeft()
+    if not self:isFacingLeft() then
+        self.animation:flipH()
+    end
+end
+
+function Character:faceRight()
+    if self:isFacingLeft() then
+        self.animation:flipH()
+    end
+end
+
 function Character:walk()
     name = self:getName()
     if name == "player1" then
@@ -291,7 +307,7 @@ function Character:handleAttackBoxes()
     local w, h = self:getBboxDimensions()
     local pb_right_edge, kb_right_edge 
 
-    if self.facingLeft then
+    if self:isFacingLeft() then
         pb_right_edge = math.abs( self.punch_box.width - w ) -- because the kick/punch box isn't as wide as the person bbox
         kb_right_edge = math.abs( self.kick_box.width - w )
         self.punch_box.x = self.position.x - w + pb_right_edge; 
@@ -300,7 +316,7 @@ function Character:handleAttackBoxes()
         self.kick_box.x = self.position.x - w + kb_right_edge;  
         self.kick_box.y = self.position.y + self.kick_box.charYOffset; 
 
-    elseif not self.facingLeft then
+    elseif not self:isFacingLeft() then
         self.punch_box.x = self.position.x + w  
         self.punch_box.y = self.position.y + self.punch_box.charYOffset; 
 

@@ -1,7 +1,7 @@
 
 AI = {
 	enemy_dead_zone_y = 15,
-    enemy_dead_zone_x = 10
+    enemy_dead_zone_x = 15
 }
 
 
@@ -15,15 +15,19 @@ function AI:update(dt, enemies, score_table)
 
         for index, player in ipairs(entities.players) do
 
+            local w, h = player:getBboxDimensions() 
+
             if en_pos_x <= player.position.x + detection_zone_width or en_pos_x <= player.position.x - detection_zone_width then
                 current_enemy.triggered = true
             else
                 current_enemy.triggered = false
             end
 
+
+
             if current_enemy.triggered then
             	--- Horizontal movement
-                if en_pos_x > player.position.x + player.width + self.enemy_dead_zone_x then
+                if en_pos_x > player.position.x + w + self.enemy_dead_zone_x then
                     local intendedX = current_enemy.position.x - current_enemy.movement_speed * dt
                     local intendedY = current_enemy.position.y
                     local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
@@ -31,9 +35,9 @@ function AI:update(dt, enemies, score_table)
                     current_enemy.position.y = actualY
                     current_enemy.animation = enemy_animations.punk.walk
                     current_enemy.image = e_punk_walk
-                    if not current_enemy.animation.flippedH then
-                        current_enemy.animation:flipH()
-                    end
+                    
+                    current_enemy:faceLeft()
+
                 elseif en_pos_x < player.position.x then
 
                     local intendedX = current_enemy.position.x + current_enemy.movement_speed * dt
@@ -41,9 +45,8 @@ function AI:update(dt, enemies, score_table)
                     local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
                     current_enemy.position.x = actualX
                     current_enemy.position.y = actualY
-                    if current_enemy.animation.flippedH then
-                        current_enemy.animation:flipH()
-                    end
+                    
+                    current_enemy:faceRight()
                 end
 
                 --- Vertical movement
@@ -69,7 +72,7 @@ function AI:update(dt, enemies, score_table)
                     current_enemy.image = e_punk_walk
                 end
 
-                if not (en_pos_x > player.position.x + player.width + self.enemy_dead_zone_y or en_pos_x < player.position.x
+                if not (en_pos_x > player.position.x + w + self.enemy_dead_zone_y or en_pos_x < player.position.x
                     or en_pos_y > player.position.y + self.enemy_dead_zone_y or
                     en_pos_y < player.position.y - self.enemy_dead_zone_y) then
                     current_enemy.animation = enemy_animations.punk.idle
@@ -84,11 +87,10 @@ function AI:update(dt, enemies, score_table)
             if player.punch_box.isActive then
 
                 if check_collision({ position = { x = player.punch_box.x, y = player.punch_box.y}, width = player.punch_box.width, height = player.punch_box.height}, current_enemy) then
-                    print("collided with fist! ")
 
                     score_table:pushScore(100)
 
-                    if player.facingLeft then
+                    if player:isFacingLeft() then
                         local intendedX = current_enemy.position.x - 100
                         local intendedY = current_enemy.position.y
                         local actualX, actualY, col, len = world:move(current_enemy, intendedX, intendedY)
@@ -115,8 +117,7 @@ function AI:update(dt, enemies, score_table)
                     end 
                 end
             end
-
-            current_enemy:handleAttackBoxes()
         end
+        current_enemy:handleAttackBoxes()
     end
 end

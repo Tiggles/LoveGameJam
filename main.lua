@@ -90,21 +90,19 @@ function love.load(arg)
     }
 
     entities.players[1].animation = player1_animations.idle
-    entities.players[1].facingLeft = false
     entities.players[1].image = p1_idle
-    entities.players[1].attackTimer = 0
 
 
     e_punk_idle = love.graphics.newImage("Assets/minienemy1_idle.png")
-    local epi = anim8.newGrid(64, 104, e_punk_idle:getWidth(), e_punk_idle:getHeight())
+    local epi = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, e_punk_idle:getWidth(), e_punk_idle:getHeight())
     e_punk_kick = love.graphics.newImage("Assets/minienemy1_kick.png")
-    local epk = anim8.newGrid(64, 104, e_punk_kick:getWidth(), e_punk_kick:getHeight())
+    local epk = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, e_punk_kick:getWidth(), e_punk_kick:getHeight())
     e_punk_punch = love.graphics.newImage("Assets/minienemy1_punch.png")
-    local epp = anim8.newGrid(64, 104, e_punk_punch:getWidth(), e_punk_punch:getHeight())
+    local epp = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, e_punk_punch:getWidth(), e_punk_punch:getHeight())
     e_punk_walk = love.graphics.newImage("Assets/minienemy1_walk.png")
-    local epw = anim8.newGrid(64, 104, e_punk_walk:getWidth(), e_punk_walk:getHeight())
+    local epw = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, e_punk_walk:getWidth(), e_punk_walk:getHeight())
     e_punk_death = love.graphics.newImage("Assets/minienemy1_death.png")
-    local epd = anim8.newGrid(64, 104, e_punk_death:getWidth(), e_punk_death:getHeight())
+    local epd = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, e_punk_death:getWidth(), e_punk_death:getHeight())
 
     e_heavy_idle = love.graphics.newImage("Assets/minienemy2_idle.png")
     local ehi = anim8.newGrid(64, 104, e_heavy_idle:getWidth(), e_heavy_idle:getHeight())
@@ -252,15 +250,6 @@ function love.update(dt)
     Score:updateScoreCount(dt)
     Timer.update(dt)
 
-    -- For each object update
-
-    -- For each enemy update
-    --print("Enemies count: " .. #entities.enemies)
-    for i = #entities.enemies, -1, 1 do
-        local enemy = entities.enemies[i]
-        enemy:updateEnemy()
-    end
-
     -- For each player update
     for i, player in ipairs(entities.players) do
         player.animation:update(dt)
@@ -269,12 +258,15 @@ function love.update(dt)
         if not punch and not kick and player.attackTimer < love.timer.getTime() then
             player:move(player.movement_speed * game_speed * x * dt, player.movement_speed * game_speed * y * dt)
         end
+        
         if x < 0 then
-            player.facingLeft = true
+            player:faceLeft()
         end
+
         if 0 < x then
-            player.facingLeft = false
+            player:faceRight()
         end
+        
         if punch and player.attackTimer < love.timer.getTime() then
             player:punch(Timer)
         end
@@ -289,14 +281,6 @@ function love.update(dt)
         elseif (player.attackTimer < love.timer.getTime()) then
             player.animation = player1_animations.idle
             player.image = p1_idle
-        end
-
-        if player.facingLeft and not player.animation.flippedH then
-            player.animation:flipH()
-        end
-
-        if not player.facingLeft and player.animation.flippedH then
-            player.animation:flipH()
         end
 
         player:handleAttackBoxes()
@@ -512,7 +496,7 @@ function debug_info()
     love.graphics.printf("enemy1 within trigger field? " .. tostring(entities.enemies[1].position.x <= entities.players[1].position.x + detection_zone_width),
         20, 6 * debug_font_size, 1000, "left")
     love.graphics.printf("enemy1 triggered? " .. tostring(entities.enemies[1].triggered), 20, 7 * debug_font_size, 1000, "left")
-    love.graphics.printf("Facing left? " .. tostring(entities.players[1].facingLeft), 20, 8 * debug_font_size, 1000, "left")
+    love.graphics.printf("Facing left? " .. tostring(entities.players[1]:isFacingLeft()), 20, 8 * debug_font_size, 1000, "left")
     love.graphics.printf("player health " .. (entities.players[1].health), 20, 9 * debug_font_size, 1000, "left")
     love.graphics.printf("enemy health " .. (entities.enemies[1].health), 20, 10 * debug_font_size, 1000, "left")
 end
