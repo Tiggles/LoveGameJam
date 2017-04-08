@@ -7,3 +7,6 @@
 [submodule "hump"]
 	path = hump
 	url = https://github.com/vrld/hump
+[submodule "inspect.lua"]
+	path = inspect
+	url = https://github.com/kikito/inspect.lua

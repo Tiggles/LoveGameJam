@@ -2,6 +2,7 @@ local enums = require "enums"
 local bump = require "bump/bump"
 local anim8 = require "anim8/anim8"
 local Timer = require "hump.timer"
+local inspect = require "inspect/inspect"
 require "character"
 require "helper_functions"
 require "ai"
@@ -181,21 +182,22 @@ function init_world(world)
 
     for i = 1, #entities.players, 1 do
         local player = entities.players[i]
-        player.position.y, player.height = player.position.y, player.height
-        player.name = "player"..i
+        player.name = "player" .. i
 
         bbox_width, bbox_height = player:getBboxDimensions()
         world:add( player, player.position.x, player.position.y, bbox_width, bbox_height)
-        player.punch_box = { x = 0, y = 0, width = 20, height = 20}
-        player.kick_box = { x = 0, y = 0, width = 20, height = 20}
+        player:setKickBox(26, 20) -- Set the width and height of the punch kick boxes
+        player:setPunchBox(22, 16)
     end
 
     for i = 1, #entities.enemies, 1 do
         local enemy = entities.enemies[i]
-        enemy.position.y, enemy.height = enemy.position.y, enemy.height
+
         bbox_width, bbox_height = enemy:getBboxDimensions()
         enemy.name = "enemy" .. enemy.kind .. i
         world:add( enemy, enemy.position.x, enemy.position.y, bbox_width, bbox_height)
+        enemy:setKickBox(26, 20)
+        enemy:setPunchBox(22, 16)
     end
 
     for i = 0, 275, 1 do
@@ -415,6 +417,7 @@ function love.draw()
             love.graphics.draw(obstacles, barricade_quad, barricade.position.x, barricade.position.y)
         end
     end
+
     for i = 1, #entities.enemies do
         local enemy = entities.enemies[i]
         if check_collision(enemy, camera_rectangle) then
@@ -424,14 +427,10 @@ function love.draw()
         end
         --enemy.animation:draw(enemy.image, enemy.position.x, enemy.position.y, 0, 1, 1)
     end
-    --[[
-    for i = #entities.objects, -1, 1 do
 
-    end
-    ]]--
     for i = 1, #entities.players do
         local player = entities.players[i]
-        local x,y = player:getBboxPosition()
+        local x, y = player:getBboxPosition()
         player.animation:draw(player.image, x, y, 0, 1, 1)
     end
 
@@ -461,7 +460,14 @@ function draw_debuxes()
     end
 
     for index, player in ipairs(entities.players) do
-        --- bounding box for 
+
+        -- lines for the frame box (e.g. where the animation frame was without any bounding box)
+        local r, g, b, a = love.graphics.getColor()
+        love.graphics.setColor(255, 0, 0, 255)
+        love.graphics.rectangle("line", player.position.x, player.position.y, player.width, player.height)
+        love.graphics.setColor(r,g,b,a)
+
+        --- bounding box for kicking and punching 
         if player.punch_box.isActive then
             love.graphics.rectangle("fill", player.punch_box.x, player.punch_box.y, player.punch_box.width, player.punch_box.height)
         else
@@ -471,6 +477,27 @@ function draw_debuxes()
             love.graphics.rectangle("fill", player.kick_box.x, player.kick_box.y, player.kick_box.width, player.kick_box.height)
         else
             love.graphics.rectangle("line", player.kick_box.x, player.kick_box.y, player.kick_box.width, player.kick_box.height)
+        end
+    end
+
+    for index, enemy in ipairs(entities.enemies) do
+
+        -- lines for the frame box (e.g. where the animation frame was without any bounding box)
+        local r, g, b, a = love.graphics.getColor()
+        love.graphics.setColor(255, 0, 0, 255)
+        love.graphics.rectangle("line", enemy.position.x, enemy.position.y, enemy.width, enemy.height)
+        love.graphics.setColor(r,g,b,a)
+
+        --- bounding box for kicking and punching 
+        if enemy.punch_box.isActive then
+            love.graphics.rectangle("fill", enemy.punch_box.x, enemy.punch_box.y, enemy.punch_box.width, enemy.punch_box.height)
+        else
+            love.graphics.rectangle("line", enemy.punch_box.x, enemy.punch_box.y, enemy.punch_box.width, enemy.punch_box.height)
+        end
+        if enemy.kick_box.isActive then
+            love.graphics.rectangle("fill", enemy.kick_box.x, enemy.kick_box.y, enemy.kick_box.width, enemy.kick_box.height)
+        else
+            love.graphics.rectangle("line", enemy.kick_box.x, enemy.kick_box.y, enemy.kick_box.width, enemy.kick_box.height)
         end
     end
 end

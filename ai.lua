@@ -82,6 +82,7 @@ function AI:update(dt, enemies, score_table)
             end
 
             if player.punch_box.isActive then
+
                 if check_collision({ position = { x = player.punch_box.x, y = player.punch_box.y}, width = player.punch_box.width, height = player.punch_box.height}, current_enemy) then
                     print("collided with fist! ")
 
@@ -114,6 +115,8 @@ function AI:update(dt, enemies, score_table)
                     end 
                 end
             end
+
+            current_enemy:handleAttackBoxes()
         end
     end
 end

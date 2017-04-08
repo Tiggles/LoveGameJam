@@ -1,5 +1,6 @@
 local enums = require "enums"
 require "position"
+require "inspect/inspect"
 
 Character = {}
 
@@ -11,11 +12,28 @@ function Character:newCharacter(x, y, health, movement_speed, attack_damage, wid
         attack_damage = attack_damage,
         width = width,
         height = height,
+        attackTimer = 0,
         bbox = { 
             width = 0, 
             height = 0, 
             offsets_x = 0, 
             offsets_y = 0 
+        },
+        punch_box = {
+            x = 0,
+            y = 0,
+            width = 0,
+            height = 0,
+            charYOffset = 14, 
+            isActive = false
+        },
+        kick_box = {
+            x = 0,
+            y = 0,
+            width = 0,
+            height = 0,
+            charYOffset = 30, 
+            isActive = false
         }
     }
     self.__index = self
@@ -39,6 +57,40 @@ function Character:setBboxDimensions(width, height, offsets)
     if width ~= nil then
         self.bbox.height = height
     end
+end
+
+function Character:setKickBox(width, height, bodyYOffset, isActive)
+    if width ~= nil then
+        self.kick_box.width = width
+    end
+    if height ~= nil then
+        self.kick_box.height = height
+    end
+    if bodyYOffset ~= nil then
+        self.kick_box.charYOffset = bodyYOffset
+    end
+    if isActive ~= nil then
+        self.kick_box.isActive = isActive
+    end
+end
+
+function Character:setPunchBox(width, height, bodyYOffset, isActive)
+    if width ~= nil then
+        self.punch_box.width = width
+    end
+    if height ~= nil then
+        self.punch_box.height = height
+    end
+    if bodyYOffset ~= nil then
+        self.punch_box.charYOffset = bodyYOffset
+    end
+    if isActive ~= nil then
+        self.punch_box.isActive = isActive
+    end
+end
+
+function Character:getKickBoxDimensions()
+    return self.kick_box.width, self.kick_box.height
 end
 
 function Character:getBboxDimensions()
@@ -236,23 +288,26 @@ function Character:move(movement_x, movement_y)
 end
 
 function Character:handleAttackBoxes()
+    local w, h = self:getBboxDimensions()
+    local pb_right_edge, kb_right_edge 
+
     if self.facingLeft then
-        self.punch_box.x = self.position.x - self.width / 2; 
-        self.punch_box.y = self.position.y + 16; --self.punch_box.width = 50; self.punch_box.height = 20
+        pb_right_edge = math.abs( self.punch_box.width - w ) -- because the kick/punch box isn't as wide as the person bbox
+        kb_right_edge = math.abs( self.kick_box.width - w )
+        self.punch_box.x = self.position.x - w + pb_right_edge; 
+        self.punch_box.y = self.position.y + self.punch_box.charYOffset; 
+
+        self.kick_box.x = self.position.x - w + kb_right_edge;  
+        self.kick_box.y = self.position.y + self.kick_box.charYOffset; 
+
     elseif not self.facingLeft then
-        self.punch_box.x = self.position.x + self.width / 2; 
-        self.punch_box.y = self.position.y + 16; --self.punch_box.width = 50; self.punch_box.height = 20
+        self.punch_box.x = self.position.x + w  
+        self.punch_box.y = self.position.y + self.punch_box.charYOffset; 
+
+        self.kick_box.x = self.position.x + w; 
+        self.kick_box.y = self.position.y + self.kick_box.charYOffset;
     end
     
-    if self.facingLeft then
-        --print("ha", self.width / 2, self.kick_box.width)
-        self.kick_box.x = self.position.x - self.width / 2; 
-        self.kick_box.y = self.position.y + 40; --self.kick_box.width = 40; self.kick_box.height = 40
-    elseif not self.facingLeft then
-        self.kick_box.x = self.position.x + self.width / 2; 
-        self.kick_box.y = self.position.y + 40; --self.kick_box.width = 40; self.kick_box.height = 40
-    end
-
     if self.attackTimer < love.timer.getTime() then
         self.kick_box.isActive = false
         self.punch_box.isActive = false
