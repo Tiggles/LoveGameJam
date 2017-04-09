@@ -178,7 +178,16 @@ function Character:punch(timer)
     local name = self:getName()
 
     if self.kicking then return end
+
+    local wasFacingLeft = self:isFacingLeft()
+
     self:setAniState('punch')
+
+    if wasFacingLeft then
+        self:faceLeft() -- make sure we face left
+    else
+        self:faceRight()
+    end
 
     if name == "player1" and not self.punching then
         self.attackTimer = love.timer.getTime() + 0.5
@@ -232,7 +241,15 @@ function Character:kick(timer)
 
     if self.punching then return end
 
+    local wasFacingLeft = self:isFacingLeft()
+
     self:setAniState('kick')
+
+    if wasFacingLeft then
+        self:faceLeft()
+    else
+        self:faceRight()
+    end
 
     if name == "player1" and not self.kicking then
         self.attackTimer = love.timer.getTime() + 0.5
