@@ -170,7 +170,6 @@ function Character:updatePlayer(delta_time)
 end
 
 function Character:death()
-    name = self:getName()
     self:setAniState('death')
 end
 
@@ -205,9 +204,16 @@ function Character:punch(timer)
     elseif name == "heavy" then
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
-    elseif name == "punk" then
+    elseif name == "punk" and not self.punching then
         self.attackTimer = love.timer.getTime() + 0.5
-        self.animation:gotoFrame(1)    
+        self.animation:gotoFrame(1)
+        timer.after(self.punch_delay, function()
+            self.punch_box.isActive = true
+        end)
+        timer.after(self.punch_delay + 0.3, function()         
+            self.punching = false
+        end)
+        self.punching = true    
     end
 
 end
@@ -267,9 +273,16 @@ function Character:kick(timer)
     elseif name == "heavy" then
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
-    elseif name == "punk" then
+    elseif name == "punk" and not self.kicking then
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
+        timer.after(self.punch_delay, function()
+            self.kick_box.isActive = true    
+        end)
+        timer.after(self.punch_delay + 0.4, function()         
+            self.kicking = false
+        end)
+        self.kicking = true
     end
 end
 
@@ -306,6 +319,9 @@ function Character:handleAttackBoxes()
         self.punch_box.isActive = false
     end
 end
+
+
+
 
 function update_as_left(delta_time)
     local x = 0

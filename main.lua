@@ -293,7 +293,7 @@ function love.update(dt)
         player:handleAttackBoxes()
     end
 
-    AI:update(dt, entities.enemies, Score)
+    AI:update(dt, Score, Timer)
 
 end
 
@@ -311,11 +311,6 @@ function love.draw()
     if (locked_camera) then
 
     else
-        --local average_x = 0
-        --for i = 1, #entities.players do
-        --    average_x = average_x + (entities.players[i].position.x - (screen_values.width / 2))
-        --end
-        --average_x = average_x / #entities.players
         x_offset = (entities.players[1].position.x - (screen_values.width / 2))
         y_offset = 0
 
@@ -433,8 +428,6 @@ function love.draw()
         love.graphics.rectangle("fill", 5, screen_values.height * 0.9, screen_values.width * 10, 1)
         love.graphics.rectangle("fill", screen_values.width * 10, 0, 1, screen_values.height)
         love.graphics.rectangle("line", entities.players[1].position.x + detection_zone_width, 0, 1, screen_values.height )
-        --love.graphics.rectangle("line", 0, entities.players[1].position.y + (entities.players[1].width / 2), screen_values.width, 1)
-        --love.graphics.rectangle("line", 0, entities.enemies[1].position.y + (entities.enemies[1].width / 2), screen_values.width, 1)
     end
 end
 
@@ -456,7 +449,7 @@ function draw_debuxes()
         local r, g, b, a = love.graphics.getColor()
         love.graphics.setColor(255, 0, 0, 255)
         love.graphics.rectangle("line", player.position.x, player.position.y, player.width, player.height)
-        love.graphics.setColor(r,g,b,a)
+        love.graphics.setColor(r, g, b, a)
 
         --- bounding box for kicking and punching 
         if player.punch_box.isActive then
