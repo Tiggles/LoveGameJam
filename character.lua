@@ -14,6 +14,7 @@ function Character:newCharacter(x, y, health, movement_speed, attack_damage, wid
         width = width,
         height = height,
         attackTimer = 0,
+        animationState = nil,
         bbox = { 
             width = 0, 
             height = 0, 
@@ -145,7 +146,12 @@ function Character:setAniState(state)
     local charImages = imageAssets[name]
 
     self.animation = charAnimations[state]
+    self.animationState = state
     self.image = charImages[state]
+end
+
+function Character:getAniState()
+    return self.animationState
 end
 
 function Character:newPlayerChar(x, y, movement_speed, attack_damage, id, width, height)
@@ -411,4 +417,46 @@ function update_as_controller(delta_time)
     return x, y, punch, kick
 end
 
+function Character:checkCollision(otherCharacter)
+    if self.punch_box.isActive then
 
+        if check_collision({ 
+            position = { 
+                x = self.punch_box.x, 
+                y = self.punch_box.y
+            }, 
+            width = self.punch_box.width, 
+            height = self.punch_box.height
+            }, otherCharacter) then
+
+            --scoreTable:pushScore(100)
+
+            if self:isFacingLeft() then
+                otherCharacter:move(-100, 0)
+            else 
+                otherCharacter:move(100, 0)
+            end 
+        end
+    end
+
+    if self.kick_box.isActive then
+
+        if check_collision({ 
+            position = { 
+                x = self.kick_box.x, 
+                y = self.kick_box.y
+            }, 
+            width = self.kick_box.width, 
+            height = self.kick_box.height
+            }, otherCharacter) then
+            
+            --scoreTable:pushScore(200)
+
+            if self:isFacingLeft() then
+                otherCharacter:move(-300, 0)
+            else 
+                otherCharacter:move(300, 0)
+            end 
+        end
+    end
+end

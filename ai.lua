@@ -15,72 +15,68 @@ end
 
 
 function AI:update(dt, scoreTable, timer)
+    local actualX, actualY, col, len
 
 	for i, currentEnemy in ipairs(entities.enemies) do
 
         currentEnemy.animation:update(dt)
-        local en_pos_x = currentEnemy.position.x
-        local en_pos_y = currentEnemy.position.y
 
         for index, player in ipairs(entities.players) do
 
             local w, h = player:getBboxDimensions() 
 
-            if en_pos_x <= player.position.x + detection_zone_width or en_pos_x <= player.position.x - detection_zone_width then
+            if currentEnemy.position.x <= player.position.x + detection_zone_width or 
+                currentEnemy.position.x <= player.position.x - detection_zone_width then
                 currentEnemy.triggered = true
             else
                 currentEnemy.triggered = false
             end
 
             if currentEnemy.triggered then
-            	--- Horizontal movement
-                if en_pos_x > player.position.x + w + self.enemy_dead_zone_x then
-                    local intendedX = currentEnemy.position.x - currentEnemy.movement_speed * dt
-                    local intendedY = currentEnemy.position.y
-                    local actualX, actualY, col, len = world:move(currentEnemy, intendedX, intendedY)
-                    currentEnemy.position.x = actualX
-                    currentEnemy.position.y = actualY
-                    currentEnemy:setAniState('walk')
-                    
-                    currentEnemy:faceLeft()
 
-                elseif en_pos_x < player.position.x then
+                if not (
+                    currentEnemy.position.x > player.position.x + w + self.enemy_dead_zone_x or 
+                    currentEnemy.position.x < player.position.x - self.enemy_dead_zone_x or 
+                    currentEnemy.position.y > player.position.y + self.enemy_dead_zone_y or
+                    currentEnemy.position.y < player.position.y - self.enemy_dead_zone_y
+                    ) then
+                    -- current enemy within "striking distance"
 
-                    local intendedX = currentEnemy.position.x + currentEnemy.movement_speed * dt
-                    local intendedY = currentEnemy.position.y
-                    local actualX, actualY, col, len = world:move(currentEnemy, intendedX, intendedY)
-                    currentEnemy.position.x = actualX
-                    currentEnemy.position.y = actualY
-                    
-                    currentEnemy:faceRight()
-                end
-
-                --- Vertical movement
-                if en_pos_y > player.position.y + self.enemy_dead_zone_y then
-                    -- enemy top to down
-
-                    local intendedX = currentEnemy.position.x
-                    local intendedY = currentEnemy.position.y - currentEnemy.movement_speed * dt
-                    local actualX, actualY, col, len = world:move(currentEnemy, intendedX, intendedY)
-                    currentEnemy.position.x = actualX
-                    currentEnemy.position.y = actualY
-                    currentEnemy:setAniState('walk')
-
-                elseif en_pos_y < player.position.y - self.enemy_dead_zone_y then
-                    -- enemy down to top
-                    local intendedX = currentEnemy.position.x
-                    local intendedY = currentEnemy.position.y + currentEnemy.movement_speed * dt
-                    local actualX, actualY, col, len = world:move(currentEnemy, intendedX, intendedY)
-                    currentEnemy.position.x = actualX
-                    currentEnemy.position.y = actualY
-                    currentEnemy:setAniState('walk')
-                end
-
-                if not (en_pos_x > player.position.x + w + self.enemy_dead_zone_y or en_pos_x < player.position.x
-                    or en_pos_y > player.position.y + self.enemy_dead_zone_y or
-                    en_pos_y < player.position.y - self.enemy_dead_zone_y) then
                     self:attack(currentEnemy, timer)
+                    currentEnemy:checkCollision(player)
                     --currentEnemy:setAniState('idle')
+                else
+                    -- else we move to get to the striking distance
+
+                	--- Horizontal movement
+                    if currentEnemy.position.x > player.position.x + w + self.enemy_dead_zone_x then
+
+                        currentEnemy:move(-currentEnemy.movement_speed * dt, 0)
+
+                        currentEnemy:setAniState('walk')
+                        currentEnemy:faceLeft()
+
+                    elseif currentEnemy.position.x < player.position.x - self.enemy_dead_zone_x then
+
+                        currentEnemy:move(currentEnemy.movement_speed * dt, 0)
+
+                        currentEnemy:setAniState('walk')
+                        currentEnemy:faceRight()
+                    end
+
+                    --- Vertical movement
+                    if currentEnemy.position.y > player.position.y + self.enemy_dead_zone_y then
+                        -- enemy top to down
+
+                        currentEnemy:move(0, -currentEnemy.movement_speed * dt)
+                        currentEnemy:setAniState('walk')
+
+                    elseif currentEnemy.position.y < player.position.y - self.enemy_dead_zone_y then
+                        -- enemy down to top
+
+                        currentEnemy:move(0, currentEnemy.movement_speed * dt)
+                        currentEnemy:setAniState('walk')
+                    end
                 end
 
             else
@@ -88,39 +84,8 @@ function AI:update(dt, scoreTable, timer)
                 currentEnemy:setAniState('idle')
             end
 
-            if player.punch_box.isActive then
+            player:checkCollision(currentEnemy)
 
-                if check_collision({ position = { x = player.punch_box.x, y = player.punch_box.y}, width = player.punch_box.width, height = player.punch_box.height}, currentEnemy) then
-
-                    scoreTable:pushScore(100)
-
-                    if player:isFacingLeft() then
-                        local intendedX = currentEnemy.position.x - 100
-                        local intendedY = currentEnemy.position.y
-                        local actualX, actualY, col, len = world:move(currentEnemy, intendedX, intendedY)
-                        currentEnemy.position.x = actualX; currentEnemy.position.y = actualY
-                    else 
-                        local intendedX = currentEnemy.position.x + 100
-                        local intendedY = currentEnemy.position.y
-                        local actualX, actualY, col, len = world:move(currentEnemy, intendedX, intendedY)
-                        currentEnemy.position.x = actualX; currentEnemy.position.y = actualY
-                    end 
-                end
-            end
-
-            if player.kick_box.isActive then
-
-                if check_collision({ position = { x = player.kick_box.x, y = player.kick_box.y}, width = player.kick_box.width, height = player.kick_box.height}, currentEnemy) then
-                    
-                    scoreTable:pushScore(200)
-
-                    if player.facingLeft then
-                        currentEnemy:move(-300, 0)
-                    else 
-                        currentEnemy:move(300, 0)
-                    end 
-                end
-            end
         end
         currentEnemy:handleAttackBoxes()
     end
