@@ -25,8 +25,8 @@ function AI:update(dt, scoreTable, timer)
 
             local w, h = player:getBboxDimensions() 
 
-            if currentEnemy.position.x <= player.position.x + detection_zone_width or 
-                currentEnemy.position.x <= player.position.x - detection_zone_width then
+            if currentEnemy.position.x <= player.position.x + detection_zone_width and
+                currentEnemy.position.x >= player.position.x + w - detection_zone_width then
                 currentEnemy.triggered = true
             else
                 currentEnemy.triggered = false
@@ -36,14 +36,33 @@ function AI:update(dt, scoreTable, timer)
 
                 if not (
                     currentEnemy.position.x > player.position.x + w + self.enemy_dead_zone_x or 
-                    currentEnemy.position.x < player.position.x - self.enemy_dead_zone_x or 
+                    currentEnemy.position.x < player.position.x - w - self.enemy_dead_zone_x or 
                     currentEnemy.position.y > player.position.y + self.enemy_dead_zone_y or
                     currentEnemy.position.y < player.position.y - self.enemy_dead_zone_y
                     ) then
                     -- current enemy within "striking distance"
 
+                    if currentEnemy.position.x > player.position.x + (w / 2) then
+                        -- if the enemy is on the right of the player, face left
+                        currentEnemy:faceLeft()
+                    else
+                        -- else face right
+                        currentEnemy:faceRight()
+                    end
+
                     self:attack(currentEnemy, timer)
-                    currentEnemy:checkCollision(player)
+
+                    -- change this to something useful
+                    currentEnemy:checkCollision(
+                        player, 
+                        function(me, other)
+                            other:looseHealth(me.attack_damage * 0.1)
+                        end, 
+                        function(me, other)
+                            other:looseHealth(me.attack_damage * 0.2)
+                        end
+                    )
+
                     --currentEnemy:setAniState('idle')
                 else
                     -- else we move to get to the striking distance
@@ -56,7 +75,7 @@ function AI:update(dt, scoreTable, timer)
                         currentEnemy:setAniState('walk')
                         currentEnemy:faceLeft()
 
-                    elseif currentEnemy.position.x < player.position.x - self.enemy_dead_zone_x then
+                    elseif currentEnemy.position.x < player.position.x - w - self.enemy_dead_zone_x then
 
                         currentEnemy:move(currentEnemy.movement_speed * dt, 0)
 
@@ -81,7 +100,7 @@ function AI:update(dt, scoreTable, timer)
 
             else
                 -- not triggered
-                currentEnemy:setAniState('idle')
+                currentEnemy:goToState('idle')
             end
 
             player:checkCollision(currentEnemy)

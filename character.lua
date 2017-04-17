@@ -44,6 +44,7 @@ end
 
 function Character:newEnemy(x, y, health, movement_speed, attack_damage, width, height)
     local new_enemy = Character:newCharacter(x, y, health, movement_speed, attack_damage, width, height)
+    new_enemy.triggered = false
     return new_enemy
 end
 
@@ -148,6 +149,19 @@ function Character:setAniState(state)
     self.animation = charAnimations[state]
     self.animationState = state
     self.image = charImages[state]
+end
+
+--[[
+Preserves the facing direction, unlike setAniState
+]]
+function Character:goToState(state)
+    local wasFacingLeft = self:isFacingLeft()
+    self:setAniState(state)
+    if wasFacingLeft then
+        self:faceLeft()
+    else
+        self:faceRight()
+    end
 end
 
 function Character:getAniState()
@@ -326,9 +340,6 @@ function Character:handleAttackBoxes()
     end
 end
 
-
-
-
 function update_as_left(delta_time)
     local x = 0
     local y = 0
@@ -417,7 +428,11 @@ function update_as_controller(delta_time)
     return x, y, punch, kick
 end
 
-function Character:checkCollision(otherCharacter)
+--[[
+    check if the self character's punch and kick boxes collide with the otherCharacter's bbox.
+    Takes a optional callback wherein the hit reaction can be expressed using the two characters as arguments 
+]]
+function Character:checkCollision(otherCharacter, onPunchCallback, onKickCallback)
     if self.punch_box.isActive then
 
         if check_collision({ 
@@ -431,11 +446,15 @@ function Character:checkCollision(otherCharacter)
 
             --scoreTable:pushScore(100)
 
-            if self:isFacingLeft() then
-                otherCharacter:move(-100, 0)
-            else 
-                otherCharacter:move(100, 0)
-            end 
+            if onPunchCallback ~= nil then
+                onPunchCallback(self, otherCharacter)
+            else
+                if self:isFacingLeft() then
+                    otherCharacter:move(-100, 0)
+                else 
+                    otherCharacter:move(100, 0)
+                end 
+            end
         end
     end
 
@@ -452,11 +471,23 @@ function Character:checkCollision(otherCharacter)
             
             --scoreTable:pushScore(200)
 
-            if self:isFacingLeft() then
-                otherCharacter:move(-300, 0)
-            else 
-                otherCharacter:move(300, 0)
-            end 
+            if onKickCallback ~= nil then
+                onKickCallback(self, otherCharacter)
+            else
+                if self:isFacingLeft() then
+                    otherCharacter:move(-300, 0)
+                else 
+                    otherCharacter:move(300, 0)
+                end 
+            end
         end
     end
+end
+
+function Character:looseHealth(attackDamage)
+    self.health = self.health - attackDamage
+end
+
+function Character:isAlive()
+    return self.health > 0
 end

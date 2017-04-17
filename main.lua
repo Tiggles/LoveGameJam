@@ -176,9 +176,21 @@ function love.load(arg)
 
     table.insert(entities.enemies, punk_enemy)
 
+    punk_enemy = new_punk(700, 650, STD_CHR_WIDTH, STD_CHR_HEIGHT)
+
+    punk_enemy:setBboxDimensions(
+        player1.width - (torso_spacing * 2), -- frame width of animation has a padding of 2 * torso spacing to make all frame equal width 
+        player1.height - head_room, -- frame width of animation has a padding head_room (space over the head) to make all frame equal height
+        { -- bounding box frame offsets, for drawing the frame 
+            x = torso_spacing, 
+            y = head_room - leg_length
+        }
+    )
+
+    table.insert(entities.enemies, punk_enemy)
+
     for index, enemy in ipairs(entities.enemies) do
-        enemy.animation:flipH()
-        enemy.triggered = false
+        enemy:faceLeft()
     end
 
     init_world(world)
@@ -261,36 +273,43 @@ function love.update(dt)
 
     -- For each player update
     for i, player in ipairs(entities.players) do
-        player.animation:update(dt)
-        x, y, punch, kick = player:updatePlayer()
-        
-        if not punch and not kick and player.attackTimer < love.timer.getTime() then
-            player:move(player.movement_speed * game_speed * x * dt, player.movement_speed * game_speed * y * dt)
-        end
-        
-        if x < 0 then
-            player:faceLeft()
-        end
 
-        if 0 < x then
-            player:faceRight()
-        end
-        
-        if punch and player.attackTimer < love.timer.getTime() then
-            player:punch(Timer)
-        end
+        if player:isAlive() then
 
-        if kick and player.attackTimer < love.timer.getTime() then
-            player:kick(Timer)
-        end
+            player.animation:update(dt)
+            x, y, punch, kick = player:updatePlayer()
+            
+            if not punch and not kick and player.attackTimer < love.timer.getTime() then
+                player:move(player.movement_speed * game_speed * x * dt, player.movement_speed * game_speed * y * dt)
+            end
+            
+            if x < 0 then
+                player:faceLeft()
+            end
 
-        if ((x ~= 0 or y ~= 0) and player.attackTimer < love.timer.getTime()) then
-            player:setAniState('walk')
-        elseif (player.attackTimer < love.timer.getTime()) then
-            player:setAniState('idle')
-        end
+            if 0 < x then
+                player:faceRight()
+            end
+            
+            if punch and player.attackTimer < love.timer.getTime() then
+                player:punch(Timer)
+            end
 
-        player:handleAttackBoxes()
+            if kick and player.attackTimer < love.timer.getTime() then
+                player:kick(Timer)
+            end
+
+            if ((x ~= 0 or y ~= 0) and player.attackTimer < love.timer.getTime()) then
+                player:setAniState('walk')
+            elseif (player.attackTimer < love.timer.getTime()) then
+                player:setAniState('idle')
+            end
+
+            player:handleAttackBoxes()
+
+        else
+            print("I am dead ", player:getName())
+        end
     end
 
     AI:update(dt, Score, Timer)
@@ -427,7 +446,11 @@ function love.draw()
         love.graphics.rectangle("fill", 5, screen_values.height * (2/5), screen_values.width * 10, 1)
         love.graphics.rectangle("fill", 5, screen_values.height * 0.9, screen_values.width * 10, 1)
         love.graphics.rectangle("fill", screen_values.width * 10, 0, 1, screen_values.height)
+
+        local w, h = entities.players[1]:getBboxDimensions()
+
         love.graphics.rectangle("line", entities.players[1].position.x + detection_zone_width, 0, 1, screen_values.height )
+        love.graphics.rectangle("line", entities.players[1].position.x + w - detection_zone_width, 0, 1, screen_values.height )
     end
 end
 
