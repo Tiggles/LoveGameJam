@@ -36,6 +36,15 @@ entities = {
     background = {}
 }
 
+camera_rectangle = {
+    position = {
+        x = 0,
+        y = 0
+    },
+    width = screen_values.width,
+    height = screen_values.height
+}
+
 
 function love.focus(focus)
     in_focus = focus
@@ -274,15 +283,18 @@ function love.update(dt)
     -- For each player update
     for i, player in ipairs(entities.players) do
 
-        if player:isAlive() then
+        player.animation:update(dt)
 
-            player.animation:update(dt)
+        if player:isAlive() then
             x, y, punch, kick = player:updatePlayer()
-            
+
             if not punch and not kick and player.attackTimer < love.timer.getTime() then
-                player:move(player.movement_speed * game_speed * x * dt, player.movement_speed * game_speed * y * dt)
+                player:move(
+                    player.movement_speed * game_speed * x * dt, 
+                    player.movement_speed * game_speed * y * dt
+                )
             end
-            
+        
             if x < 0 then
                 player:faceLeft()
             end
@@ -299,21 +311,19 @@ function love.update(dt)
                 player:kick(Timer)
             end
 
-            if ((x ~= 0 or y ~= 0) and player.attackTimer < love.timer.getTime()) then
-                player:setAniState('walk')
+            if (x ~= 0 or y ~= 0) and player.attackTimer < love.timer.getTime() then
+                player:goToState('walk')
             elseif (player.attackTimer < love.timer.getTime()) then
-                player:setAniState('idle')
+                player:goToState('idle')
             end
 
             player:handleAttackBoxes()
-
         else
-            print("I am dead ", player:getName())
+            player:death()
         end
     end
 
     AI:update(dt, Score, Timer)
-
 end
 
 function love.draw()
@@ -333,19 +343,13 @@ function love.draw()
         x_offset = (entities.players[1].position.x - (screen_values.width / 2))
         y_offset = 0
 
-        camera_rectangle = {
-            position = {
-                x = x_offset,
-                y = y_offset
-            },
-            width = screen_values.width,
-            height = screen_values.height
-        }
+        camera_rectangle.position.x = x_offset
+        camera_rectangle.position.y = y_offset
+            
+        love.graphics.translate(-x_offset, y_offset)
     end
 
-    love.graphics.translate(-x_offset, 0)
-
-
+    
     --- background ---
 
     --Draw top of planks
@@ -428,9 +432,7 @@ function love.draw()
         if check_collision(enemy, camera_rectangle) then
             local x, y = enemy:getBboxPosition()
             enemy.animation:draw(enemy.image, x, y, 0, 1, 1)
-            --love.graphics.draw(, enemy.position.x, enemy.position.y, enemy.width, enemy.height)
         end
-        --enemy.animation:draw(enemy.image, enemy.position.x, enemy.position.y, 0, 1, 1)
     end
 
     for i = 1, #entities.players do
@@ -438,7 +440,6 @@ function love.draw()
         local x, y = player:getBboxPosition()
         player.animation:draw(player.image, x, y, 0, 1, 1)
     end
-
 
     if debug then
         draw_debuxes()
@@ -450,7 +451,7 @@ function love.draw()
         local w, h = entities.players[1]:getBboxDimensions()
 
         love.graphics.rectangle("line", entities.players[1].position.x + detection_zone_width, 0, 1, screen_values.height )
-        love.graphics.rectangle("line", entities.players[1].position.x + w - detection_zone_width, 0, 1, screen_values.height )
+        love.graphics.rectangle("line", entities.players[1].position.x + w - detection_zone_width, 0, 1, screen_values.height )        
     end
 end
 

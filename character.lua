@@ -4,7 +4,6 @@ local inspect = require "inspect/inspect"
 
 Character = {}
 
-
 function Character:newCharacter(x, y, health, movement_speed, attack_damage, width, height)
     local new_character = {
         position = Position:newPosition(x, y),
@@ -140,13 +139,17 @@ function Character:getName()
     return self.kind
 end
 
-function Character:setAniState(state)
+function Character:setAniState(state, doClone)
     local name = self:getName()
-
     local charAnimations = animationAssets[name]
     local charImages = imageAssets[name]
 
-    self.animation = charAnimations[state]
+    if doClone then
+        self.animation = charAnimations[state]:clone()
+    else
+        self.animation = charAnimations[state]
+    end
+
     self.animationState = state
     self.image = charImages[state]
 end
@@ -154,9 +157,9 @@ end
 --[[
 Preserves the facing direction, unlike setAniState
 ]]
-function Character:goToState(state)
+function Character:goToState(state, doClone)
     local wasFacingLeft = self:isFacingLeft()
-    self:setAniState(state)
+    self:setAniState(state, doClone)
     if wasFacingLeft then
         self:faceLeft()
     else
@@ -190,7 +193,18 @@ function Character:updatePlayer(delta_time)
 end
 
 function Character:death()
-    self:setAniState('death')
+    self.health = 0 -- make sure it's dead
+    
+    if self:getAniState() ~= "death" then
+        self:goToState('death', true)
+    end
+
+    self:setKickBox(0, 0, 0, false)
+    self:setPunchBox(0, 0, 0, false)
+
+    if world:hasItem(self) then
+        world:remove(self)
+    end
 end
 
 function Character:punch(timer)
