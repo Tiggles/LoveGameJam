@@ -336,8 +336,8 @@ function love.update(dt)
 
 
     if gameOver then
-        gameoverColors.G = math.max(gameoverColors.G - dt * 50, 0)
-        gameoverColors.B = math.max(gameoverColors.B - dt * 50, 0)
+        gameoverColors.G = math.max(gameoverColors.G - dt * 148, 0)
+        gameoverColors.B = math.max(gameoverColors.B - dt * 148, 0)
     end
 
     AI:update(dt, Score, Timer)
