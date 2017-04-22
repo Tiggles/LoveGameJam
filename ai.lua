@@ -107,10 +107,10 @@ function AI:update(dt, scoreTable, timer)
                 player:checkCollision(
                     currentEnemy, 
                     function(me, other)
-                        other.health = other.health - me.attack_damage * 0.1
+                        other.health = other.health - me.attack_damage * 0.15
                     end, 
                     function(me, other)
-                        other.health = other.health - me.attack_damage * 0.2
+                        other.health = other.health - me.attack_damage * 0.25
                     end
                 )
 

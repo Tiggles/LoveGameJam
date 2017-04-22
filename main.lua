@@ -435,10 +435,16 @@ function love.draw()
         end
     end
 
+    local gameOver = true
     for i = 1, #entities.players do
         local player = entities.players[i]
         local x, y = player:getBboxPosition()
         player.animation:draw(player.image, x, y, 0, 1, 1)
+        gameOver = gameOver and (not player:isAlive())
+    end
+
+    if gameOver then
+        love.graphics.setColor(255, 0, 0, 255)
     end
 
     if debug then
