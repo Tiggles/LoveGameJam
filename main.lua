@@ -14,6 +14,7 @@ screen_values = { width = 1600, height = 960 }
 game_speed = 1
 detection_zone_width = 200
 debug_font_size = 16
+game_over = false
 
 love.window.setMode( screen_values.width, screen_values.height, { resizable = true, vsync = true, minwidth = 1600, minheight= 960 , fullscreen = false })
 love.window.setTitle( "Wrong Neighborhood" )
@@ -281,12 +282,20 @@ function love.update(dt)
         love.event.quit();
     end
 
-    Score:updateTimer(dt)
-    Score:updateScoreCount(dt)
+    if not game_over then
+        Score:updateTimer(dt)
+        Score:updateScoreCount(dt)
+    end
+    
     Timer.update(dt)
 
     -- For each player update
     for i, player in ipairs(entities.players) do
+
+        if not game_over then
+            --check if game is over
+            game_over = not (game_over or player:isAlive())
+        end
 
         player.animation:update(dt)
 
@@ -326,16 +335,11 @@ function love.update(dt)
         else
             player:death()
         end
-    end
 
-    local gameOver = true
-    for i = 1, #entities.players do
-        local player = entities.players[i]
-        gameOver = gameOver and (not player:isAlive())
     end
 
 
-    if gameOver then
+    if game_over then
         gameoverColors.G = math.max(gameoverColors.G - dt * 148, 0)
         gameoverColors.B = math.max(gameoverColors.B - dt * 148, 0)
     end
@@ -452,15 +456,14 @@ function love.draw()
         end
     end
 
-    local gameOver = true
+    
     for i = 1, #entities.players do
         local player = entities.players[i]
         local x, y = player:getBboxPosition()
         player.animation:draw(player.image, x, y, 0, 1, 1)
-        gameOver = gameOver and (not player:isAlive())
     end
 
-    if gameOver then
+    if game_over then
         love.graphics.setColor(255, gameoverColors.G, gameoverColors.B, 255)
     end
 
