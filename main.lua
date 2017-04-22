@@ -18,6 +18,11 @@ debug_font_size = 16
 love.window.setMode( screen_values.width, screen_values.height, { resizable = true, vsync = true, minwidth = 1600, minheight= 960 , fullscreen = false })
 love.window.setTitle( "Wrong Neighborhood" )
 
+gameoverColors =  {
+    G = 255,
+    B = 255
+}
+
 entities = {
     players = {},
     enemies = {},
@@ -67,10 +72,10 @@ function love.load(arg)
     local leg_length = 20
 
     player1:setBboxDimensions(
-        player1.width - (torso_spacing * 2), -- frame width of animation has a padding of 2 * torso spacing to make all frame equal width 
+        player1.width - (torso_spacing * 2), -- frame width of animation has a padding of 2 * torso spacing to make all frame equal width
         player1.height - head_room, -- frame width of animation has a padding head_room (space over the head) to make all frame equal height
-        { -- bounding box frame offsets, for drawing the frame 
-            x = torso_spacing, 
+        { -- bounding box frame offsets, for drawing the frame
+            x = torso_spacing,
             y = head_room - leg_length
         }
     )
@@ -175,10 +180,10 @@ function love.load(arg)
     local punk_enemy = new_punk(600, 600, STD_CHR_WIDTH, STD_CHR_HEIGHT)
 
     punk_enemy:setBboxDimensions(
-        player1.width - (torso_spacing * 2), -- frame width of animation has a padding of 2 * torso spacing to make all frame equal width 
+        player1.width - (torso_spacing * 2), -- frame width of animation has a padding of 2 * torso spacing to make all frame equal width
         player1.height - head_room, -- frame width of animation has a padding head_room (space over the head) to make all frame equal height
-        { -- bounding box frame offsets, for drawing the frame 
-            x = torso_spacing, 
+        { -- bounding box frame offsets, for drawing the frame
+            x = torso_spacing,
             y = head_room - leg_length
         }
     )
@@ -188,10 +193,10 @@ function love.load(arg)
     punk_enemy = new_punk(700, 650, STD_CHR_WIDTH, STD_CHR_HEIGHT)
 
     punk_enemy:setBboxDimensions(
-        player1.width - (torso_spacing * 2), -- frame width of animation has a padding of 2 * torso spacing to make all frame equal width 
+        player1.width - (torso_spacing * 2), -- frame width of animation has a padding of 2 * torso spacing to make all frame equal width
         player1.height - head_room, -- frame width of animation has a padding head_room (space over the head) to make all frame equal height
-        { -- bounding box frame offsets, for drawing the frame 
-            x = torso_spacing, 
+        { -- bounding box frame offsets, for drawing the frame
+            x = torso_spacing,
             y = head_room - leg_length
         }
     )
@@ -290,11 +295,11 @@ function love.update(dt)
 
             if not punch and not kick and player.attackTimer < love.timer.getTime() then
                 player:move(
-                    player.movement_speed * game_speed * x * dt, 
+                    player.movement_speed * game_speed * x * dt,
                     player.movement_speed * game_speed * y * dt
                 )
             end
-        
+
             if x < 0 then
                 player:faceLeft()
             end
@@ -302,7 +307,7 @@ function love.update(dt)
             if 0 < x then
                 player:faceRight()
             end
-            
+
             if punch and player.attackTimer < love.timer.getTime() then
                 player:punch(Timer)
             end
@@ -321,6 +326,18 @@ function love.update(dt)
         else
             player:death()
         end
+    end
+
+    local gameOver = true
+    for i = 1, #entities.players do
+        local player = entities.players[i]
+        gameOver = gameOver and (not player:isAlive())
+    end
+
+
+    if gameOver then
+        gameoverColors.G = math.max(gameoverColors.G - dt * 50, 0)
+        gameoverColors.B = math.max(gameoverColors.B - dt * 50, 0)
     end
 
     AI:update(dt, Score, Timer)
@@ -345,11 +362,11 @@ function love.draw()
 
         camera_rectangle.position.x = x_offset
         camera_rectangle.position.y = y_offset
-            
+
         love.graphics.translate(-x_offset, y_offset)
     end
 
-    
+
     --- background ---
 
     --Draw top of planks
@@ -444,7 +461,7 @@ function love.draw()
     end
 
     if gameOver then
-        love.graphics.setColor(255, 0, 0, 255)
+        love.graphics.setColor(255, gameoverColors.G, gameoverColors.B, 255)
     end
 
     if debug then
@@ -457,7 +474,7 @@ function love.draw()
         local w, h = entities.players[1]:getBboxDimensions()
 
         love.graphics.rectangle("line", entities.players[1].position.x + detection_zone_width, 0, 1, screen_values.height )
-        love.graphics.rectangle("line", entities.players[1].position.x + w - detection_zone_width, 0, 1, screen_values.height )        
+        love.graphics.rectangle("line", entities.players[1].position.x + w - detection_zone_width, 0, 1, screen_values.height )
     end
 end
 
@@ -481,7 +498,7 @@ function draw_debuxes()
         love.graphics.rectangle("line", player.position.x, player.position.y, player.width, player.height)
         love.graphics.setColor(r, g, b, a)
 
-        --- bounding box for kicking and punching 
+        --- bounding box for kicking and punching
         if player.punch_box.isActive then
             love.graphics.rectangle("fill", player.punch_box.x, player.punch_box.y, player.punch_box.width, player.punch_box.height)
         else
@@ -502,7 +519,7 @@ function draw_debuxes()
         love.graphics.rectangle("line", enemy.position.x, enemy.position.y, enemy.width, enemy.height)
         love.graphics.setColor(r,g,b,a)
 
-        --- bounding box for kicking and punching 
+        --- bounding box for kicking and punching
         if enemy.punch_box.isActive then
             love.graphics.rectangle("fill", enemy.punch_box.x, enemy.punch_box.y, enemy.punch_box.width, enemy.punch_box.height)
         else
