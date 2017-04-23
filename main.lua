@@ -466,7 +466,22 @@ function love.draw()
     end
 
     if game_over then
+
+        local old_f = love.graphics.getFont()
         love.graphics.setColor(255, gameoverColors.G, gameoverColors.B, 255)
+        local f = love.graphics.newFont("Assets/PressStart2P.ttf", 75)
+        love.graphics.setFont(f)
+
+        local text_length = f:getWidth("Game Over")
+        local position = { x = love.graphics.getWidth() / 2 - text_length, y = love.graphics.getHeight() / 2 - 75 }
+
+        love.graphics.print("Game Over", position.x, position.y)
+
+        love.graphics.setFont(old_f)
+
+        --[[Timer.after(3, function()
+            love.graphics.printf("Game Over", 20, 11 * debug_font_size, 1000, "left")
+        end);]]
     end
 
     if debug then
