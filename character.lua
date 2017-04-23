@@ -4,6 +4,23 @@ local inspect = require "inspect/inspect"
 
 Character = {}
 
+local characterCollisionFilter = function(me, other)
+    local name = me:getName()
+
+    if name == "punk" then
+        if other.name then
+            local other_name = other:getName()
+            if other_name == "punk" or other_name == "heavy" then
+                return "cross"
+            else
+                return "slide"
+            end
+        end
+    end
+
+    return "slide"
+end
+
 function Character:newCharacter(x, y, health, movement_speed, attack_damage, width, height)
     local new_character = {
         position = Position:newPosition(x, y),
@@ -14,6 +31,9 @@ function Character:newCharacter(x, y, health, movement_speed, attack_damage, wid
         height = height,
         attackTimer = 0,
         animationState = nil,
+        effects = {
+            stunned = false
+        },
         bbox = { 
             width = 0, 
             height = 0, 
@@ -154,6 +174,7 @@ function Character:setAniState(state, doClone)
     self.image = charImages[state]
 end
 
+
 --[[
 Preserves the facing direction, unlike setAniState
 ]]
@@ -193,36 +214,26 @@ function Character:updatePlayer(delta_time)
 end
 
 function Character:death()
-    self.health = 0 -- make sure it's dead
-    
     if self:getAniState() ~= "death" then
+        self.health = 0 -- make sure it's dead
         self:goToState('death', true)
-    end
+        self:setKickBox(0, 0, 0, false)
+        self:setPunchBox(0, 0, 0, false)
 
-    self:setKickBox(0, 0, 0, false)
-    self:setPunchBox(0, 0, 0, false)
-
-    if world:hasItem(self) then
-        world:remove(self)
+        if world:hasItem(self) then
+            world:remove(self)
+        end
     end
 end
 
 function Character:punch(timer)
     local name = self:getName()
 
-    if self.kicking then return end
+    if self.kicking or self.effects.stunned then return end
 
-    local wasFacingLeft = self:isFacingLeft()
+    self:goToState('punch')
 
-    self:setAniState('punch')
-
-    if wasFacingLeft then
-        self:faceLeft() -- make sure we face left
-    else
-        self:faceRight()
-    end
-
-    if name == "player1" and not self.punching then
+    if not self.punching then
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
         timer.after(self.punch_delay, function()
@@ -232,24 +243,35 @@ function Character:punch(timer)
             self.punching = false
         end)
         self.punching = true
-    elseif name == "player2" then
-        self.attackTimer = love.timer.getTime() + 0.5
-        self.animation:gotoFrame(1)
-    elseif name == "heavy" then
-        self.attackTimer = love.timer.getTime() + 0.5
-        self.animation:gotoFrame(1)
-    elseif name == "punk" and not self.punching then
-        self.attackTimer = love.timer.getTime() + 0.5
-        self.animation:gotoFrame(1)
-        timer.after(self.punch_delay, function()
-            self.punch_box.isActive = true
-        end)
-        timer.after(self.punch_delay + 0.3, function()         
-            self.punching = false
-        end)
-        self.punching = true    
     end
+end
 
+function Character:stun(knockbackDist)
+    if not self.effects.stunned then
+        self:goToState("stun")
+        if self.kick_box.isActive then
+            self.kick_box.isActive = false
+            self.kicking = false
+        end
+        if self.punch_box.isActive then
+            self.punch_box.isActive = false
+            self.punching = false
+        end
+        
+        self.effects.stunned = true
+
+        Timer.after(0.6, function()
+            self.effects.stunned = false
+        end)
+
+        if knockbackDist then
+            if self:isFacingLeft() then
+                self.position.x = self.position.x + knockbackDist
+            else
+                self.position.x = self.position.x - knockbackDist
+            end
+        end
+    end
 end
 
 function Character:isFacingLeft()
@@ -279,7 +301,7 @@ end
 function Character:kick(timer)
     local name = self:getName()
 
-    if self.punching then return end
+    if self.punching or self.effects.stunned then return end
 
     local wasFacingLeft = self:isFacingLeft()
 
@@ -291,23 +313,7 @@ function Character:kick(timer)
         self:faceRight()
     end
 
-    if name == "player1" and not self.kicking then
-        self.attackTimer = love.timer.getTime() + 0.5
-        self.animation:gotoFrame(1)
-        timer.after(self.punch_delay, function()
-            self.kick_box.isActive = true    
-        end)
-        timer.after(self.punch_delay + 0.4, function()         
-            self.kicking = false
-        end)
-        self.kicking = true
-    elseif name == "player2" then
-        self.attackTimer = love.timer.getTime() + 0.5
-        self.animation:gotoFrame(1)
-    elseif name == "heavy" then
-        self.attackTimer = love.timer.getTime() + 0.5
-        self.animation:gotoFrame(1)
-    elseif name == "punk" and not self.kicking then
+    if not self.kicking then
         self.attackTimer = love.timer.getTime() + 0.5
         self.animation:gotoFrame(1)
         timer.after(self.punch_delay, function()
@@ -320,10 +326,29 @@ function Character:kick(timer)
     end
 end
 
+local characterCollisionFilter = function(me, other)
+    local name = me:getName()
+
+    if name == "punk" or name == "heavy" then
+        if other.kind then
+            local other_name = other:getName()
+            if other_name == "punk" or other_name == "heavy" then
+                return "cross"
+            else
+                return "slide"
+            end
+        end
+    end
+
+    return "slide"
+end
+
 function Character:move(movement_x, movement_y)
+    if self.effects.stunned then return end
+
     local intendedX = self.position.x + movement_x
     local intendedY = self.position.y + movement_y
-    local actualX, actualY, col, len = world:move(self, intendedX, intendedY)
+    local actualX, actualY, col, len = world:move(self, intendedX, intendedY, characterCollisionFilter)
     self.position.x = actualX; self.position.y = actualY;
 end
 

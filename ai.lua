@@ -99,7 +99,7 @@ function AI:update(dt, scoreTable, timer)
                         end
                     end
 
-                else
+                elseif not (currentEnemy.triggered or currentEnemy.effects.stunned) then
                     -- not triggered
                     currentEnemy:goToState('idle')
                 end
@@ -107,10 +107,11 @@ function AI:update(dt, scoreTable, timer)
                 player:checkCollision(
                     currentEnemy, 
                     function(me, other)
-                        other.health = other.health - me.attack_damage * 0.15
+                        other:looseHealth(me.attack_damage * 0.15)
                     end, 
                     function(me, other)
-                        other.health = other.health - me.attack_damage * 0.25
+                        other:looseHealth(me.attack_damage * 0.2)
+                        other:stun()
                     end
                 )
 

@@ -1,8 +1,8 @@
 local enums = require "enums"
 local bump = require "bump/bump"
 local anim8 = require "anim8/anim8"
-local Timer = require "hump.timer"
 local inspect = require "inspect/inspect"
+Timer = require "hump.timer"
 require "character"
 require "helper_functions"
 require "ai"
@@ -99,7 +99,8 @@ function love.load(arg)
             punch = love.graphics.newImage("Assets/minienemy1_punch.png"),
             walk = love.graphics.newImage("Assets/minienemy1_walk.png"),
             kick = love.graphics.newImage("Assets/minienemy1_kick.png"),
-            death = love.graphics.newImage("Assets/minienemy1_death.png")
+            death = love.graphics.newImage("Assets/minienemy1_death.png"),
+            stun = love.graphics.newImage("Assets/minienemy1_stun.png")
         },
         heavy = {
             idle = love.graphics.newImage("Assets/minienemy2_idle.png"),
@@ -123,6 +124,7 @@ function love.load(arg)
     local epp = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.punch:getWidth(), char.punch:getHeight())
     local epw = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.walk:getWidth(), char.walk:getHeight())
     local epd = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.death:getWidth(), char.death:getHeight())
+    local epstun = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.stun:getWidth(), char.stun:getHeight())
 
     char = imageAssets['heavy']
     local ehi = anim8.newGrid(64, 104, char.idle:getWidth(), char.idle:getHeight())
@@ -143,7 +145,8 @@ function love.load(arg)
             kick = anim8.newAnimation(epk('1-4', 1), 0.1),
             punch = anim8.newAnimation(epp('1-4', 1), 0.1),
             walk = anim8.newAnimation(epw('1-4', 1), 0.1),
-            death = anim8.newAnimation(epd('1-6', 1), 0.25, "pauseAtEnd")
+            death = anim8.newAnimation(epd('1-6', 1), 0.25, "pauseAtEnd"),
+            stun = anim8.newAnimation(epstun('1-2', 1), {0.25, .60}, "pauseAtEnd")
         },
         heavy = {
             idle = anim8.newAnimation(ehi('1-4', 1), 0.25),
@@ -286,7 +289,7 @@ function love.update(dt)
         Score:updateTimer(dt)
         Score:updateScoreCount(dt)
     end
-    
+
     Timer.update(dt)
 
     -- For each player update
@@ -337,7 +340,6 @@ function love.update(dt)
         end
 
     end
-
 
     if game_over then
         gameoverColors.G = math.max(gameoverColors.G - dt * 148, 0)
@@ -494,13 +496,6 @@ function draw_debuxes()
     end
 
     for index, player in ipairs(entities.players) do
-
-        -- lines for the frame box (e.g. where the animation frame was without any bounding box)
-        local r, g, b, a = love.graphics.getColor()
-        love.graphics.setColor(255, 0, 0, 255)
-        love.graphics.rectangle("line", player.position.x, player.position.y, player.width, player.height)
-        love.graphics.setColor(r, g, b, a)
-
         --- bounding box for kicking and punching
         if player.punch_box.isActive then
             love.graphics.rectangle("fill", player.punch_box.x, player.punch_box.y, player.punch_box.width, player.punch_box.height)
@@ -515,13 +510,6 @@ function draw_debuxes()
     end
 
     for index, enemy in ipairs(entities.enemies) do
-
-        -- lines for the frame box (e.g. where the animation frame was without any bounding box)
-        local r, g, b, a = love.graphics.getColor()
-        love.graphics.setColor(255, 0, 0, 255)
-        love.graphics.rectangle("line", enemy.position.x, enemy.position.y, enemy.width, enemy.height)
-        love.graphics.setColor(r,g,b,a)
-
         --- bounding box for kicking and punching
         if enemy.punch_box.isActive then
             love.graphics.rectangle("fill", enemy.punch_box.x, enemy.punch_box.y, enemy.punch_box.width, enemy.punch_box.height)
