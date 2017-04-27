@@ -19,6 +19,9 @@ game_over = false
 love.window.setMode( screen_values.width, screen_values.height, { resizable = true, vsync = true, minwidth = 1600, minheight= 960 , fullscreen = false })
 love.window.setTitle( "Wrong Neighborhood" )
 
+has_joysticks = #love.joystick.getJoysticks() > 0
+
+
 gameoverColors =  {
     G = 255,
     B = 255
@@ -81,6 +84,10 @@ function love.load(arg)
         }
     )
 
+    if has_joysticks then
+        player1.control_scheme = enums.control_schemes.controller
+    end
+
     table.insert(entities.players, player1)
 
     Score:setupTimer(0)
@@ -92,7 +99,8 @@ function love.load(arg)
             punch = love.graphics.newImage("Assets/miniplayer_punch.png"),
             walk = love.graphics.newImage("Assets/miniplayer_walk.png"),
             kick = love.graphics.newImage("Assets/miniplayer_kick.png"),
-            death = love.graphics.newImage("Assets/miniplayer_death.png")
+            death = love.graphics.newImage("Assets/miniplayer_death.png"),
+            stun = love.graphics.newImage("Assets/miniplayer_stun.png")
         },
         punk = {
             idle = love.graphics.newImage("Assets/minienemy1_idle.png"),
@@ -117,6 +125,7 @@ function love.load(arg)
     local k = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.walk:getWidth(), char.walk:getHeight())
     local l = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.kick:getWidth(), char.kick:getHeight())
     local m = anim8.newGrid(64, 104, char.death:getWidth(), char.death:getHeight())
+    local stun = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.stun:getWidth(), char.stun:getHeight())
 
     char = imageAssets['punk']
     local epi = anim8.newGrid(STD_CHR_WIDTH, STD_CHR_HEIGHT, char.idle:getWidth(), char.idle:getHeight())
@@ -138,7 +147,8 @@ function love.load(arg)
             punch = anim8.newAnimation(j('1-4', 1), 0.1),
             walk = anim8.newAnimation(k('1-4', 1), 0.1),
             kick = anim8.newAnimation(l('1-4', 1), 0.1),
-            death = anim8.newAnimation(m('1-4', 1), 0.25, "pauseAtEnd")
+            death = anim8.newAnimation(m('1-4', 1), 0.25, "pauseAtEnd"),
+            stun = anim8.newAnimation(stun('1-2', 1), {.05, .60}, "pauseAtEnd")
         },
         punk = {
             idle = anim8.newAnimation(epi('1-4', 1), 0.25),
@@ -146,7 +156,7 @@ function love.load(arg)
             punch = anim8.newAnimation(epp('1-4', 1), 0.1),
             walk = anim8.newAnimation(epw('1-4', 1), 0.1),
             death = anim8.newAnimation(epd('1-6', 1), 0.25, "pauseAtEnd"),
-            stun = anim8.newAnimation(epstun('1-2', 1), {0.25, .60}, "pauseAtEnd")
+            stun = anim8.newAnimation(epstun('1-2', 1), {.05, .60}, "pauseAtEnd")
         },
         heavy = {
             idle = anim8.newAnimation(ehi('1-4', 1), 0.25),
@@ -281,7 +291,9 @@ function init_world(world)
 end
 
 function love.update(dt)
-    if love.keyboard.isDown("escape") then
+
+    if love.keyboard.isDown("escape") or 
+        ( has_joysticks and love.joystick.getJoysticks()[1]:isGamepadDown('guide') ) then
         love.event.quit();
     end
 
@@ -473,7 +485,7 @@ function love.draw()
         love.graphics.setFont(f)
 
         local text_length = f:getWidth("Game Over")
-        local position = { x = love.graphics.getWidth() / 2 - text_length, y = love.graphics.getHeight() / 2 - 75 }
+        local position = { x = camera_rectangle.width / 2 - text_length, y = camera_rectangle.height / 2 - 75 }
 
         love.graphics.print("Game Over", position.x, position.y)
 

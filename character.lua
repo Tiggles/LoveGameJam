@@ -209,7 +209,7 @@ function Character:updatePlayer(delta_time)
     elseif (enums.control_schemes.right_control_scheme == self.control_scheme) then
         return update_as_right()
     elseif (enums.control_schemes.controller == self.control_scheme) then
-        return update_as_controller()
+        return update_as_controller(delta_time, self.id)
     end
 end
 
@@ -433,10 +433,10 @@ function update_as_right(delta_time)
     return x, y, punch, kick
 end
 
-function update_as_controller(delta_time)
+function update_as_controller(delta_time, player_id)
     if love.joystick.getJoystickCount() == 0 then return end
 
-    local joystick = love.joystick.getJoysticks()[1]
+    local joystick = love.joystick.getJoysticks()[player_id]
     local x = 0
     local y = 0
     local punch = false
@@ -458,10 +458,10 @@ function update_as_controller(delta_time)
     elseif math.abs(joystick:getAxis( 2 )) > 0.2 then 
         y = joystick:getAxis( 2 )
     end
-    if joystick:isDown(3) then
+    if joystick:isGamepadDown("a") then
         punch = true
     end
-    if joystick:isDown(4) then
+    if joystick:isGamepadDown("b") then
         kick = true
     end
     return x, y, punch, kick

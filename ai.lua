@@ -58,13 +58,14 @@ function AI:update(dt, scoreTable, timer)
                             player, 
                             function(me, other)
                                 other:looseHealth(me.attack_damage * 0.1)
+                                --other:stun()
                             end, 
                             function(me, other)
                                 other:looseHealth(me.attack_damage * 0.2)
+                                other:stun()
                             end
                         )
 
-                        --currentEnemy:setAniState('idle')
                     else
                         -- else we move to get to the striking distance
 
@@ -108,6 +109,7 @@ function AI:update(dt, scoreTable, timer)
                     currentEnemy, 
                     function(me, other)
                         other:looseHealth(me.attack_damage * 0.15)
+                       -- other:stun()
                     end, 
                     function(me, other)
                         other:looseHealth(me.attack_damage * 0.2)
