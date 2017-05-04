@@ -60,7 +60,8 @@ function love.focus(focus)
 end
 
 function love.load(arg)
-
+    h_scale = 2
+    v_scale = 2
     -- Load Textures
     font = love.graphics.newFont("Assets/PressStart2P.ttf", debug_font_size)
     love.graphics.setFont(font)
@@ -367,21 +368,18 @@ function love.draw()
     Score:drawTimer()
     Score:drawScoreCount()
 
-    if debug then
-        debug_info()
-    end
     -- Draw each animation and object within the frame
     local x_offset, y_offset
     if (locked_camera) then
 
     else
-        x_offset = (entities.players[1].position.x - (screen_values.width / 2))
-        y_offset = 0
+        x_offset = (entities.players[1].position.x - (screen_values.width / 4))
+        y_offset = screen_values.height / 2
 
         camera_rectangle.position.x = x_offset
         camera_rectangle.position.y = y_offset
 
-        love.graphics.translate(-x_offset, y_offset)
+        love.graphics.translate(-x_offset, -y_offset)
     end
 
 
@@ -497,6 +495,9 @@ function love.draw()
     end
 
     if debug then
+        love.graphics.translate(x_offset, y_offset)
+        debug_info()
+        love.graphics.translate(-x_offset, -y_offset)
         draw_debuxes()
         love.graphics.rectangle("fill", 5, 0, 1, screen_values.height)
         love.graphics.rectangle("fill", 5, screen_values.height * (2/5), screen_values.width * 10, 1)
