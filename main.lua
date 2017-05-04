@@ -512,8 +512,8 @@ function love.draw()
 end
 
 function love.resize(width, height)
-	h_scale = width / screen_values.width
-	v_scale = height / screen_values.height
+	h_scale = (width / screen_values.width) * 2
+	v_scale = (height / screen_values.height) * 2 
 end
 
 function draw_debuxes()
